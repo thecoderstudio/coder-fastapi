@@ -3,9 +3,9 @@ requires = ["setuptools>=62"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "coderweb"
+name = "coderfastapi"
 version = "0.1.4"
-description = "coderweb"
+description = "coderfastapi"
 readme = "README.md"
 authors = [{ name = "Code R", email = "hello@coderstudio.dev" }]
 dependencies = [
