@@ -1,10 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, FastAPI
 
 from coderfastapi.lib.validation.schemas import VersionSchema
 
 
-async def register_version_handler(
-    router: APIRouter,
+def register_version_handler(
+    router: APIRouter | FastAPI,
     version: str,
     path: str = '/'
 ) -> None:

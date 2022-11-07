@@ -1,0 +1,16 @@
+version: '3'
+services:
+  coder-fastapi-test:
+    container_name: coder-fastapi-test
+    image: coder-fastapi:test
+    build:
+      context: .
+    volumes:
+      - .:/home/coder/coder-fastapi
+      - /home/coder/coder-fastapi/coderfastapi.egg-info
+    networks:
+      - test
+    tty: true
+    stdin_open: true
+networks:
+  test:
