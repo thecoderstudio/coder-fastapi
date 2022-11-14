@@ -9,7 +9,7 @@ description = "coderfastapi"
 readme = "README.md"
 authors = [{ name = "Code R", email = "hello@coderstudio.dev" }]
 dependencies = [
-    'codercore ~= 0.2.4'
+    'codercore ~= 0.3'
 ]
 
 [tool.bumpver]
