@@ -3,7 +3,7 @@ from http import HTTPStatus
 import pytest
 from fastapi import HTTPException
 
-from coderfastapi.lib.decorators import http_require 
+from coderfastapi.lib.decorators import http_require
 
 
 @http_require("sample")
