@@ -1,12 +1,8 @@
-import copy
 import logging
 
 from fastapi import HTTPException
 
-Authenticated = "Authenticated"
-Allow = "Allow"
-Deny = "Deny"
-Everyone = "Everyone"
+from coderfastapi.lib.security.acl import Allow, Authenticated, Deny, Everyone
 
 log = logging.getLogger(__name__)
 
