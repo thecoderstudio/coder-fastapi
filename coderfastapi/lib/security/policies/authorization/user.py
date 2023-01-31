@@ -16,8 +16,8 @@ class UserAuthorizationPolicy(AuthorizationPolicy):
         authenticated_user_id = http_connection.user_id
         if authenticated_user_id:
             principals = cls._with_authenticated_user_principals(
-                authenticated_user_id,
                 principals,
+                str(authenticated_user_id),
             )
 
         log.debug(f"Found principals: {principals}")
