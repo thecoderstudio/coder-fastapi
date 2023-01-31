@@ -1,8 +1,13 @@
 import copy
-import inspect
+from inspect import Parameter, Signature
+from typing import Sequence
 
 
-def copy_parameters(from_signature, to_signature, parameter_keys):
+def copy_parameters(
+    from_signature: Signature,
+    to_signature: Signature,
+    parameter_keys: Sequence[str],
+) -> Signature:
     filtered_parameters = [
         to_signature.parameters[key]
         for key in to_signature.parameters
@@ -16,14 +21,20 @@ def copy_parameters(from_signature, to_signature, parameter_keys):
     return new_signature
 
 
-def _bulk_create_new_parameters(existing_parameters, new_parameters):
+def _bulk_create_new_parameters(
+    existing_parameters: list[Parameter],
+    new_parameters: list[Parameter],
+) -> list[Parameter]:
     parameters = existing_parameters
     for new_parameter in new_parameters:
         parameters = _create_new_parameters(parameters, new_parameter)
     return parameters
 
 
-def _create_new_parameters(existing_parameters, new_parameter):
+def _create_new_parameters(
+    existing_parameters: list[Parameter],
+    new_parameter: Parameter,
+) -> list[Parameter]:
     if not existing_parameters:
         return [new_parameter]
 
@@ -39,5 +50,5 @@ def _create_new_parameters(existing_parameters, new_parameter):
         return [new_parameter] + existing_parameters
 
 
-def check_parameter_has_default(parameter):
-    return parameter.default != inspect.Parameter.empty
+def check_parameter_has_default(parameter: Parameter) -> bool:
+    return parameter.default != Parameter.empty
