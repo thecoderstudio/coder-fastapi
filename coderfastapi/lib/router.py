@@ -3,7 +3,7 @@ import inspect
 from fastapi import APIRouter, Request
 from fastapi.requests import HTTPConnection
 
-from coderfastapi.lib.security import Allow, AuthorizationPolicy, Everyone
+from coderfastapi.lib.security import AuthorizationPolicy
 from coderfastapi.lib.security.acl import ACL, ACLProvider
 from coderfastapi.lib.signature import copy_parameters
 
@@ -13,9 +13,6 @@ class SecureRouter(APIRouter, ACLProvider):
         ACLProvider.__init__(acl)
         APIRouter.__init__(*args, **kwargs)
         self.acl_policy = AuthorizationPolicy(self)
-
-    def __acl__(self):
-        return self.acl + [(Allow, Everyone, "public")]
 
     async def _call_handler_with_authentication(
         self,
