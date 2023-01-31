@@ -21,7 +21,10 @@ test = [
     'pytest-xdist[psutil] ~= 3.1',
 ]
 dev = [
-    'black ~= 22.12'
+    'black ~= 22.12',
+    'bumpver ~= 2022.1120',
+    'flake8 ~= 6.0',
+    'isort ~= 5.12',
 ]
 
 [tool.bumpver]
@@ -37,3 +40,8 @@ push = true
     'current_version = "{version}"',
     'version = "{version}"'
 ]
+
+[tool.isort]
+profile = "black"
+src_paths = ["coderfastapi", "tests"]
+combine_as_imports = true
