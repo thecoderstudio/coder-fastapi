@@ -25,7 +25,7 @@ class UserAuthenticationPolicy(AuthenticationPolicy):
         return self._set_current_user_id(request)
 
     def _set_current_user_id(self, request: T) -> T:
-        request_ = copy.deepcopy(request)
+        request_ = copy.copy(request)
         request_.user_id = self._get_authenticated_user_id(request_.headers)
         return request_
 
