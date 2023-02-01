@@ -15,7 +15,6 @@ def test_user_auth_policy_unauthenticated(mocker, request_with_session_mock):
 
 
 def test_user_auth_policy_authenticated(mocker, request_with_session_mock):
-
     user_id = uuid.uuid4()
     policy = UserAuthorizationPolicy(get_acl_provider_mock(mocker, ()))
     request_with_session_mock.user_id = user_id
