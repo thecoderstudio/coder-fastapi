@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 
-def create_http_connection_mock(headers: dict = {}) -> MagicMock:
-    connection_mock = patch("fastapi.requests.HTTPConnection")
-    connection_mock.headers = headers
-    return connection_mock
+def create_request_with_session_mock(headers: dict = {}) -> MagicMock:
+    request_mock = patch("coderfastapi.lib.requests.RequestWithSession")
+    request_mock.headers = headers
+    return request_mock

@@ -4,8 +4,9 @@ from datetime import datetime, timedelta
 from typing import Optional
 from uuid import UUID
 
-from fastapi.requests import HTTPConnection
 from jose import JWTError, jwt
+
+from coderfastapi.lib.requests import RequestWithSession
 
 log = logging.getLogger(__name__)
 
@@ -16,16 +17,14 @@ class UserAuthenticationPolicy:
         self.algorithm = algorithm
 
     def authenticate_connection(
-        self, http_connection: HTTPConnection
-    ) -> HTTPConnection:
-        return self._set_current_user_id(http_connection)
+        self, request: RequestWithSession
+    ) -> RequestWithSession:
+        return self._set_current_user_id(request)
 
-    def _set_current_user_id(self, http_connection: HTTPConnection) -> HTTPConnection:
-        http_connection_ = copy.deepcopy(http_connection)
-        http_connection_.user_id = self._get_authenticated_user_id(
-            http_connection_.headers
-        )
-        return http_connection_
+    def _set_current_user_id(self, request: RequestWithSession) -> RequestWithSession:
+        request_ = copy.deepcopy(request)
+        request_.user_id = self._get_authenticated_user_id(request_.headers)
+        return request_
 
     def _get_authenticated_user_id(self, headers: dict) -> Optional[UUID]:
         try:
