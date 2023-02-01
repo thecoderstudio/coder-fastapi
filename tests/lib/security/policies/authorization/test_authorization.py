@@ -25,7 +25,7 @@ def test_validate_permission_denied_explicit_with_context_provider(
     mock_policy, mock_context_acl_provider, request_with_session_mock
 ):
     policy = mock_policy(((Allow, Everyone, "public"),))
-    with raises_http_forbidden:
+    with raises_http_forbidden():
         policy.validate_permission(
             "public",
             request_with_session_mock,
@@ -35,14 +35,14 @@ def test_validate_permission_denied_explicit_with_context_provider(
 
 def test_validate_permission_denied_implicit(mock_policy, request_with_session_mock):
     policy = mock_policy(((Allow, Everyone, "fake"), (Allow, "test", "public")))
-    with raises_http_forbidden:
+    with raises_http_forbidden():
         policy.validate_permission("public", request_with_session_mock)
 
 
 def test_validate_permission_invalid_acl(mock_policy, request_with_session_mock):
     policy = mock_policy((("test", Everyone, "public"),))
 
-    with raises_http_forbidden:
+    with raises_http_forbidden():
         policy.validate_permission("public", request_with_session_mock)
 
 

@@ -52,7 +52,7 @@ async def test_secure_router_http_methods_cookie_permissions(
             http_method, router_acl, permission, request_mock, jwt_secret
         )
     else:
-        with raises_http_forbidden:
+        with raises_http_forbidden():
             await call_http_method_decorated_mock(
                 http_method, router_acl, permission, request_mock, jwt_secret
             )

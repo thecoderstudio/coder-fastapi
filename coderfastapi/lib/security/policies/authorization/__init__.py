@@ -1,4 +1,5 @@
 import logging
+from http import HTTPStatus
 from typing import Optional
 
 from fastapi import HTTPException
@@ -33,7 +34,10 @@ class AuthorizationPolicy:
         if allowed:
             return
 
-        raise HTTPException(status_code=403, detail="Permission denied.")
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Permission denied.",
+        )
 
     def check_permission(
         self,
