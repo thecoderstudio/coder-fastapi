@@ -22,6 +22,6 @@ def jwt_secret() -> str:
 
 
 @fixture
-def access_token(jwt_secret) -> str:
+def access_token(jwt_secret: str) -> str:
     policy = UserAuthenticationPolicy(jwt_secret)
     return policy.create_access_token(uuid.uuid4(), timedelta(minutes=10))

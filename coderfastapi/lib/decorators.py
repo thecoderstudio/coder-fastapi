@@ -1,6 +1,6 @@
 from functools import wraps
 from http import HTTPStatus
-from typing import Awaitable, Callable, Optional, ParamSpec, TypeVar
+from typing import Awaitable, Callable, Optional, TypeVar
 
 from fastapi import HTTPException
 

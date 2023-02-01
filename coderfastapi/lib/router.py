@@ -1,10 +1,14 @@
 import inspect
+from typing import Awaitable, Callable, ParamSpec, TypeVar
 
 from fastapi import APIRouter, Request
 
 from coderfastapi.lib.security.policies.authentication import AuthenticationPolicy
 from coderfastapi.lib.security.policies.authorization import AuthorizationPolicy
 from coderfastapi.lib.signature import copy_parameters
+
+T = TypeVar("T")
+P = ParamSpec("P")
 
 
 class SecureRouter(APIRouter):
@@ -24,12 +28,12 @@ class SecureRouter(APIRouter):
 
     async def _call_handler_with_authentication(
         self,
-        handler,
+        handler: Callable[P, Awaitable[T] | T],
         permission: str,
         request: Request,
-        *args,
-        **kwargs,
-    ):
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> T:
         authenticated_request = self.authentication_policy.authenticate_request(request)
         self.authorization_policy.validate_permission(permission, authenticated_request)
 
@@ -73,16 +77,16 @@ class SecureRouter(APIRouter):
 
     def _http_method(
         self,
-        func,
+        func: Callable[P, Awaitable[T] | T],
         http_method: str,
         *outer_args,
         permission: str = "public",
         **outer_kwargs,
-    ):
+    ) -> Callable[[Request, P], Awaitable[T]]:
         route = getattr(super(SecureRouter, self), http_method)
 
         @route(*outer_args, **outer_kwargs)
-        async def wrapped(request: Request, *args, **kwargs):
+        async def wrapped(request: Request, *args, **kwargs) -> T:
             return await self._call_handler_with_authentication(
                 func, permission, request, *args, **kwargs
             )

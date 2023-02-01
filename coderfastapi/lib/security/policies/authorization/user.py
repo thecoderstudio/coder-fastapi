@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class UserAuthorizationPolicy(AuthorizationPolicy):
     @classmethod
-    def get_principals(cls, request: RequestWithSession):
+    def get_principals(cls, request: RequestWithSession) -> tuple[str, ...]:
         principals = super().get_principals(request)
 
         authenticated_user_id = request.user_id
