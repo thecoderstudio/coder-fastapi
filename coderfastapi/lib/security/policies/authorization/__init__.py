@@ -11,6 +11,8 @@ log = logging.getLogger(__name__)
 
 
 class AuthorizationPolicy:
+    acl_provider: ACLProvider
+
     def __init__(self, acl_provider: ACLProvider) -> None:
         self.acl_provider = acl_provider
 

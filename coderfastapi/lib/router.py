@@ -1,38 +1,37 @@
 import inspect
 
 from fastapi import APIRouter, Request
-from fastapi.requests import HTTPConnection
 
-from coderfastapi.lib.security import AuthorizationPolicy
-from coderfastapi.lib.security.acl import ACL, ACLProvider
+from coderfastapi.lib.security.policies.authentication import AuthenticationPolicy
+from coderfastapi.lib.security.policies.authorization import AuthorizationPolicy
 from coderfastapi.lib.signature import copy_parameters
 
 
-class SecureRouter(APIRouter, ACLProvider):
+class SecureRouter(APIRouter):
+    authentication_policy: AuthenticationPolicy
+    authorization_policy: AuthorizationPolicy
+
     def __init__(
         self,
         authentication_policy: AuthenticationPolicy,
         authorization_policy: AuthorizationPolicy,
         *args,
-        acl: ACL = (),
         **kwargs,
     ) -> None:
-        ACLProvider.__init__(acl)
-        APIRouter.__init__(*args, **kwargs)
-        self.acl_policy = AuthorizationPolicy(self)
+        super().__init__(*args, **kwargs)
+        self.authentication_policy = authentication_policy
+        self.authorization_policy = authorization_policy
 
     async def _call_handler_with_authentication(
         self,
         handler,
-        permission,
-        http_connection: HTTPConnection,
+        permission: str,
+        request: Request,
         *args,
         **kwargs,
     ):
-        enhanced_http_connection = self.acl_policy.enhance_http_connection(
-            http_connection
-        )
-        self.acl_policy.validate_permission(permission, enhanced_http_connection)
+        authenticated_request = self.authentication_policy.authenticate_request(request)
+        self.authorization_policy.validate_permission(permission, authenticated_request)
 
         output = handler(*args, **kwargs)
         if inspect.iscoroutine(output):
@@ -73,7 +72,12 @@ class SecureRouter(APIRouter, ACLProvider):
         return lambda func: self._http_method(func, "head", *outer_args, **outer_kwargs)
 
     def _http_method(
-        self, func, http_method, *outer_args, permission="public", **outer_kwargs
+        self,
+        func,
+        http_method: str,
+        *outer_args,
+        permission: str = "public",
+        **outer_kwargs,
     ):
         route = getattr(super(SecureRouter, self), http_method)
 

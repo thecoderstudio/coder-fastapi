@@ -9,4 +9,4 @@ T = TypeVar("T", bound=Request)
 class AuthenticationPolicy(ABC):
     @abstractmethod
     def authenticate_request(self, request: T) -> T:
-        pass
+        """Adds metadata to request if properly authenticated."""
