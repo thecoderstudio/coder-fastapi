@@ -1,27 +1,27 @@
 import copy
 import logging
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, TypeVar
 from uuid import UUID
 
 from jose import JWTError, jwt
 
 from coderfastapi.lib.requests import RequestWithSession
+from coderfastapi.lib.security.policies.authentication import AuthenticationPolicy
 
 log = logging.getLogger(__name__)
+T = TypeVar("T", bound=RequestWithSession)
 
 
-class UserAuthenticationPolicy:
+class UserAuthenticationPolicy(AuthenticationPolicy):
     def __init__(self, secret_key: str, algorithm: str = "HS256") -> None:
         self.secret_key = secret_key
         self.algorithm = algorithm
 
-    def authenticate_connection(
-        self, request: RequestWithSession
-    ) -> RequestWithSession:
+    def authenticate_request(self, request: T) -> T:
         return self._set_current_user_id(request)
 
-    def _set_current_user_id(self, request: RequestWithSession) -> RequestWithSession:
+    def _set_current_user_id(self, request: T) -> T:
         request_ = copy.deepcopy(request)
         request_.user_id = self._get_authenticated_user_id(request_.headers)
         return request_

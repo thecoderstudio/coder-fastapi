@@ -1,7 +1,5 @@
 import logging
 
-from fastapi.requests import HTTPConnection
-
 from coderfastapi.lib.requests import RequestWithSession
 from coderfastapi.lib.security import Authenticated
 from coderfastapi.lib.security.policies.authorization import AuthorizationPolicy

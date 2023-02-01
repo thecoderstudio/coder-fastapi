@@ -9,7 +9,14 @@ from coderfastapi.lib.signature import copy_parameters
 
 
 class SecureRouter(APIRouter, ACLProvider):
-    def __init__(self, acl: ACL = (), *args, **kwargs):
+    def __init__(
+        self,
+        authentication_policy: AuthenticationPolicy,
+        authorization_policy: AuthorizationPolicy,
+        *args,
+        acl: ACL = (),
+        **kwargs,
+    ) -> None:
         ACLProvider.__init__(acl)
         APIRouter.__init__(*args, **kwargs)
         self.acl_policy = AuthorizationPolicy(self)

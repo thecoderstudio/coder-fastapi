@@ -25,14 +25,14 @@ TOKEN_WITH_MALFORMED_USER_ID = (
 )
 
 
-def test_authenticate_connection_success(request_with_session_mock):
+def test_authenticate_request_success(request_with_session_mock):
     user_id = uuid.uuid4()
     policy = UserAuthenticationPolicy(FAKE_KEY)
     access_token = policy.create_access_token(user_id, timedelta(minutes=1))
     request_with_session_mock.user_id = None
     request_with_session_mock.headers = {"authorization": f"Bearer {access_token}"}
 
-    authenticated_connection = policy.authenticate_connection(request_with_session_mock)
+    authenticated_connection = policy.authenticate_request(request_with_session_mock)
     assert authenticated_connection.user_id == user_id
     assert request_with_session_mock.user_id is None
 
@@ -48,13 +48,11 @@ def test_authenticate_connection_success(request_with_session_mock):
         {"authorization": f"Bearer {TOKEN_WITH_MALFORMED_USER_ID}"},
     ],
 )
-def test_authenticate_connection_failure(request_with_session_mock, headers):
+def test_authenticate_request_failure(request_with_session_mock, headers):
     policy = UserAuthenticationPolicy(FAKE_KEY)
     request_with_session_mock.headers = headers
 
-    unauthenticated_connection = policy.authenticate_connection(
-        request_with_session_mock
-    )
+    unauthenticated_connection = policy.authenticate_request(request_with_session_mock)
 
     assert unauthenticated_connection.user_id is None
 
