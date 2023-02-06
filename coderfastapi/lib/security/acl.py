@@ -9,7 +9,7 @@ DEFAULT_ACL: ACL = ((Allow, Everyone, "public"),)
 
 
 class ACLProvider:
-    acl: ACL
+    acl: ACL = ()
 
     def __init__(self, acl: ACL = ()) -> None:
         self.acl = acl
