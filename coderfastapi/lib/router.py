@@ -1,3 +1,4 @@
+import copy
 import inspect
 from typing import Any, Awaitable, Callable, ParamSpec, TypeVar
 
@@ -47,11 +48,24 @@ class SecureRouter(APIRouter):
             context_acl_provider,
         )
 
+        kwargs = self._propagate_context(handler, kwargs, context)
         output = handler(*args, **kwargs)
         if inspect.iscoroutine(output):
             output = await output
 
         return output
+
+    @staticmethod
+    def _propagate_context(
+        func: Callable[P, Awaitable[T] | T],
+        kwargs: [str, Any],
+        context: Any | None,
+    ) -> dict[str, Any]:
+        new_kwargs = copy.copy(kwargs)
+        func_signature = inspect.signature(func)
+        if func_signature.parameters.get("context"):
+            new_kwargs["context"] = context
+        return new_kwargs
 
     def post(self, *outer_args, **outer_kwargs):
         return lambda func: self._http_method(func, "post", *outer_args, **outer_kwargs)

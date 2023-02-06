@@ -108,11 +108,13 @@ async def test_secure_router_context_acl_provider_permissions(jwt_secret, access
         UserAuthorizationPolicy(acl_provider),
     )
 
+    expected_context = ContextACLProvider()
+
     async def get_context():
-        return ContextACLProvider()
+        return expected_context
 
     @router.post("/test_async", permission="context_access")
     async def async_endpoint_mock(context=Depends(get_context)):
-        pass
+        assert context is expected_context
 
     await async_endpoint_mock(request=request_mock, context=await get_context())
