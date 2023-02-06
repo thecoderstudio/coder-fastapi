@@ -3,6 +3,7 @@ from typing import Awaitable, Callable, ParamSpec, TypeVar
 
 from fastapi import APIRouter, Request
 
+from coderfastapi.lib.security.acl import ACLProvider
 from coderfastapi.lib.security.policies.authentication import AuthenticationPolicy
 from coderfastapi.lib.security.policies.authorization import AuthorizationPolicy
 from coderfastapi.lib.signature import copy_parameters
@@ -34,8 +35,16 @@ class SecureRouter(APIRouter):
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> T:
+        context_acl_provider = kwargs.get("context")
+        if not isinstance(context_acl_provider, ACLProvider):
+            context_acl_provider = None
+
         authenticated_request = self.authentication_policy.authenticate_request(request)
-        self.authorization_policy.validate_permission(permission, authenticated_request)
+        self.authorization_policy.validate_permission(
+            permission,
+            authenticated_request,
+            context_acl_provider,
+        )
 
         output = handler(*args, **kwargs)
         if inspect.iscoroutine(output):
