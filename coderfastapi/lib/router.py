@@ -1,5 +1,5 @@
 import inspect
-from typing import Awaitable, Callable, ParamSpec, TypeVar
+from typing import Any, Awaitable, Callable, ParamSpec, TypeVar
 
 from fastapi import APIRouter, Request
 
@@ -32,12 +32,13 @@ class SecureRouter(APIRouter):
         handler: Callable[P, Awaitable[T] | T],
         permission: str,
         request: Request,
+        context: Any | None,
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> T:
-        context_acl_provider = kwargs.get("context")
-        if not isinstance(context_acl_provider, ACLProvider):
-            context_acl_provider = None
+        context_acl_provider = None
+        if isinstance(context, ACLProvider):
+            context_acl_provider = context
 
         authenticated_request = self.authentication_policy.authenticate_request(request)
         self.authorization_policy.validate_permission(
@@ -95,9 +96,14 @@ class SecureRouter(APIRouter):
         route = getattr(super(SecureRouter, self), http_method)
 
         @route(*outer_args, **outer_kwargs)
-        async def wrapped(request: Request, *args, **kwargs) -> T:
+        async def wrapped(
+            request: Request,
+            context: Any | None = None,
+            *args,
+            **kwargs,
+        ) -> T:
             return await self._call_handler_with_authentication(
-                func, permission, request, *args, **kwargs
+                func, permission, request, context, *args, **kwargs
             )
 
         wrapped_signature = inspect.signature(wrapped)

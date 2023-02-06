@@ -1,4 +1,5 @@
 import pytest
+from fastapi import Depends
 
 from coderfastapi.lib.router import SecureRouter
 from coderfastapi.lib.security import Allow, Authenticated
@@ -33,9 +34,14 @@ testable_http_methods = [
 ]
 
 
+class ContextACLProvider(ACLProvider):
+    def __init__(self):
+        super().__init__(((Allow, Authenticated, "context_access"),))
+
+
 @pytest.mark.parametrize("permission,authenticated,permitted", permission_expectations)
 @pytest.mark.parametrize("http_method", testable_http_methods)
-async def test_secure_router_http_methods_cookie_permissions(
+async def test_secure_router_http_methods_permissions(
     jwt_secret,
     access_token,
     permission,
@@ -91,3 +97,22 @@ async def call_http_method_decorated_mock(
 
     await endpoint_mock(request=request_mock)
     await async_endpoint_mock(request=request_mock)
+
+
+async def test_secure_router_context_acl_provider_permissions(jwt_secret, access_token):
+    router_acl, request_mock = generate_http_test_parameters(True, access_token)
+
+    acl_provider = ACLProvider(router_acl)
+    router = SecureRouter(
+        UserAuthenticationPolicy(jwt_secret),
+        UserAuthorizationPolicy(acl_provider),
+    )
+
+    async def get_context():
+        return ContextACLProvider()
+
+    @router.post("/test_async", permission="context_access")
+    async def async_endpoint_mock(context=Depends(get_context)):
+        pass
+
+    await async_endpoint_mock(request=request_mock, context=await get_context())
