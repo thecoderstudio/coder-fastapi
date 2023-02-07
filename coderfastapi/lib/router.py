@@ -1,8 +1,10 @@
+import copy
 import inspect
-from typing import Awaitable, Callable, ParamSpec, TypeVar
+from typing import Any, Awaitable, Callable, ParamSpec, TypeVar
 
 from fastapi import APIRouter, Request
 
+from coderfastapi.lib.security.acl import ACLProvider
 from coderfastapi.lib.security.policies.authentication import AuthenticationPolicy
 from coderfastapi.lib.security.policies.authorization import AuthorizationPolicy
 from coderfastapi.lib.signature import copy_parameters
@@ -31,17 +33,39 @@ class SecureRouter(APIRouter):
         handler: Callable[P, Awaitable[T] | T],
         permission: str,
         request: Request,
+        context: Any | None,
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> T:
-        authenticated_request = self.authentication_policy.authenticate_request(request)
-        self.authorization_policy.validate_permission(permission, authenticated_request)
+        context_acl_provider = None
+        if isinstance(context, ACLProvider):
+            context_acl_provider = context
 
+        authenticated_request = self.authentication_policy.authenticate_request(request)
+        self.authorization_policy.validate_permission(
+            permission,
+            authenticated_request,
+            context_acl_provider,
+        )
+
+        kwargs = self._propagate_context(handler, kwargs, context)
         output = handler(*args, **kwargs)
         if inspect.iscoroutine(output):
             output = await output
 
         return output
+
+    @staticmethod
+    def _propagate_context(
+        func: Callable[P, Awaitable[T] | T],
+        kwargs: [str, Any],
+        context: Any | None,
+    ) -> dict[str, Any]:
+        new_kwargs = copy.copy(kwargs)
+        func_signature = inspect.signature(func)
+        if func_signature.parameters.get("context"):
+            new_kwargs["context"] = context
+        return new_kwargs
 
     def post(self, *outer_args, **outer_kwargs):
         return lambda func: self._http_method(func, "post", *outer_args, **outer_kwargs)
@@ -86,9 +110,14 @@ class SecureRouter(APIRouter):
         route = getattr(super(SecureRouter, self), http_method)
 
         @route(*outer_args, **outer_kwargs)
-        async def wrapped(request: Request, *args, **kwargs) -> T:
+        async def wrapped(
+            request: Request,
+            context: Any | None = None,
+            *args,
+            **kwargs,
+        ) -> T:
             return await self._call_handler_with_authentication(
-                func, permission, request, *args, **kwargs
+                func, permission, request, context, *args, **kwargs
             )
 
         wrapped_signature = inspect.signature(wrapped)
