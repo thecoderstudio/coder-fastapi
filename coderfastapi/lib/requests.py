@@ -11,7 +11,5 @@ class RequestWithSession(Request):
     @staticmethod
     def from_request(request: Request) -> Self:
         return RequestWithSession(
-            scope=request.scope,
-            receive=request.receive,
-            send=request._send
+            scope=request.scope, receive=request.receive, send=request._send
         )

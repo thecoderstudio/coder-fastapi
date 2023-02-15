@@ -30,9 +30,10 @@ class UserAuthenticationPolicy(AuthenticationPolicy):
         if decoded_access_token:
             request_.user_id = self._get_authenticated_user_id(decoded_access_token)
             request_.recovery = self._get_recovery_from_decoded_access_token(
-                decoded_access_token)
+                decoded_access_token
+            )
         return request_
-    
+
     def _decode_access_token(self, headers: dict) -> Optional[dict]:
         try:
             auth_method, access_token = get_auth_method_and_token(
@@ -63,12 +64,15 @@ class UserAuthenticationPolicy(AuthenticationPolicy):
         log.info(f"Authenticated user: {user_id}")
         return user_id
 
-    def create_access_token(self, user_id: UUID, delta: timedelta, 
-                            recovery: bool = False) -> str:
+    def create_access_token(
+        self, user_id: UUID, delta: timedelta, recovery: bool = False
+    ) -> str:
         return jwt.encode(
-            {"user_id": str(user_id), 
-             "exp": datetime.utcnow() + delta, 
-             "recovery": recovery},
+            {
+                "user_id": str(user_id),
+                "exp": datetime.utcnow() + delta,
+                "recovery": recovery,
+            },
             self.secret_key,
             algorithm=self.algorithm,
         )
