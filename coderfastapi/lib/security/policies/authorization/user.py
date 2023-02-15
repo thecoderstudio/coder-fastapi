@@ -12,9 +12,6 @@ class UserAuthorizationPolicy(AuthorizationPolicy):
     def get_principals(cls, request: RequestWithSession) -> tuple[str, ...]:
         principals = super().get_principals(request)
 
-        print("&" * 80)
-
-        print(request)
         authenticated_user_id = request.user_id
         if request.recovery:
             principals += (f"recovering_user:{request.user_id}",)
