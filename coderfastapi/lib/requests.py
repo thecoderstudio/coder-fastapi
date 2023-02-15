@@ -6,11 +6,12 @@ from fastapi import Request
 
 class RequestWithSession(Request):
     user_id: Optional[UUID] = None
+    recovery: bool = False
 
     @staticmethod
     def from_request(request: Request) -> Self:
         return RequestWithSession(
             scope=request.scope,
             receive=request.receive,
-            send=request._send,
+            send=request._send
         )

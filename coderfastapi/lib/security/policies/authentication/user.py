@@ -26,10 +26,14 @@ class UserAuthenticationPolicy(AuthenticationPolicy):
 
     def _set_current_user_id(self, request: T) -> T:
         request_ = copy.copy(request)
-        request_.user_id = self._get_authenticated_user_id(request_.headers)
+        decoded_access_token = self._decode_access_token(request_.headers)
+        if decoded_access_token:
+            request_.user_id = self._get_authenticated_user_id(decoded_access_token)
+            request_.recovery = self._get_recovery_from_decoded_access_token(
+                decoded_access_token)
         return request_
-
-    def _get_authenticated_user_id(self, headers: dict) -> Optional[UUID]:
+    
+    def _decode_access_token(self, headers: dict) -> Optional[dict]:
         try:
             auth_method, access_token = get_auth_method_and_token(
                 headers["authorization"]
@@ -37,21 +41,37 @@ class UserAuthenticationPolicy(AuthenticationPolicy):
             if auth_method != "Bearer":
                 return None
 
-            decoded = jwt.decode(
+            return jwt.decode(
                 access_token,
                 self.secret_key,
                 algorithms=[self.algorithm],
             )
-            user_id = UUID(decoded["user_id"])
         except (JWTError, KeyError, ValueError):
+            return None
+
+    @staticmethod
+    def _get_recovery_from_decoded_access_token(decoded_token: dict) -> bool:
+        recovery = decoded_token.get("recovery", False)
+
+        log.info(f"Recovery mode: {recovery}")
+        return recovery
+
+    @staticmethod
+    def _get_authenticated_user_id(decoded_token: dict) -> Optional[UUID]:
+        try:
+            user_id = UUID(decoded_token["user_id"])
+        except KeyError:
             return None
 
         log.info(f"Authenticated user: {user_id}")
         return user_id
 
-    def create_access_token(self, user_id: UUID, delta: timedelta) -> str:
+    def create_access_token(self, user_id: UUID, delta: timedelta, 
+                            recovery: bool = False) -> str:
         return jwt.encode(
-            {"user_id": str(user_id), "exp": datetime.utcnow() + delta},
+            {"user_id": str(user_id), 
+             "exp": datetime.utcnow() + delta, 
+             "recovery": recovery},
             self.secret_key,
             algorithm=self.algorithm,
         )

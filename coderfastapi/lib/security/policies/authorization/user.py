@@ -13,7 +13,9 @@ class UserAuthorizationPolicy(AuthorizationPolicy):
         principals = super().get_principals(request)
 
         authenticated_user_id = request.user_id
-        if authenticated_user_id:
+        if request.recovery:
+            principals += (f"recovering_user:{authenticated_user_id}",)
+        elif authenticated_user_id:
             principals = cls._with_authenticated_user_principals(
                 principals,
                 str(authenticated_user_id),
