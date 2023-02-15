@@ -58,10 +58,7 @@ class UserAuthenticationPolicy(AuthenticationPolicy):
 
     @staticmethod
     def _get_authenticated_user_id(decoded_token: dict) -> Optional[UUID]:
-        try:
-            user_id = UUID(decoded_token["user_id"])
-        except KeyError:
-            return None
+        user_id = UUID(decoded_token["user_id"])
 
         log.info(f"Authenticated user: {user_id}")
         return user_id
