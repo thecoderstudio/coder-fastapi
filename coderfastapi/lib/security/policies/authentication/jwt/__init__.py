@@ -2,9 +2,9 @@ import copy
 import logging
 from typing import Any, TypeVar
 
+from fastapi import Request
 from jose import JWTError, jwt
 
-from coderfastapi.lib.requests import AugmentableRequest
 from coderfastapi.lib.security.policies.authentication import AuthenticationPolicy
 from coderfastapi.lib.security.policies.authentication.jwt.providers import (
     JWTDataProvider,
@@ -20,7 +20,7 @@ from coderfastapi.lib.security.policies.authentication.jwt.providers.user import
 )
 
 log = logging.getLogger(__name__)
-T = TypeVar("T", bound=AugmentableRequest)
+T = TypeVar("T", bound=Request)
 
 
 class JWTAuthenticationPolicy(AuthenticationPolicy):
