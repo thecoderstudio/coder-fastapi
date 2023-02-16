@@ -2,9 +2,9 @@ import copy
 from abc import ABC, abstractmethod
 from typing import Any, TypeVar
 
-from fastapi import Request
+from coderfastapi.lib.requests import AugmentableRequest
 
-T = TypeVar("T", bound=Request)
+T = TypeVar("T", bound=AugmentableRequest)
 
 
 class JWTDataProvider(ABC):
