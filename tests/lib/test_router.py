@@ -4,8 +4,8 @@ from fastapi import Depends
 from coderfastapi.lib.router import SecureRouter
 from coderfastapi.lib.security import Allow, Authenticated
 from coderfastapi.lib.security.acl import ACLProvider
-from coderfastapi.lib.security.policies.authentication.user import (
-    UserAuthenticationPolicy,
+from coderfastapi.lib.security.policies.authentication.jwt import (
+    JWTAuthenticationPolicy,
 )
 from coderfastapi.lib.security.policies.authorization.user import (
     UserAuthorizationPolicy,
@@ -82,7 +82,7 @@ async def call_http_method_decorated_mock(
 ):
     acl_provider = ACLProvider(router_acl)
     router = SecureRouter(
-        UserAuthenticationPolicy(jwt_secret),
+        JWTAuthenticationPolicy(jwt_secret),
         UserAuthorizationPolicy(acl_provider),
     )
     route_decorator = getattr(router, http_method)
@@ -104,7 +104,7 @@ async def test_secure_router_context_acl_provider_permissions(jwt_secret, access
 
     acl_provider = ACLProvider(router_acl)
     router = SecureRouter(
-        UserAuthenticationPolicy(jwt_secret),
+        JWTAuthenticationPolicy(jwt_secret),
         UserAuthorizationPolicy(acl_provider),
     )
 
