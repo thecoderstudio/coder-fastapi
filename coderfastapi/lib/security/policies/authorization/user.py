@@ -1,6 +1,7 @@
 import logging
 
-from coderfastapi.lib.requests import RequestWithSession
+from fastapi import Request
+
 from coderfastapi.lib.security import Authenticated
 from coderfastapi.lib.security.policies.authorization import AuthorizationPolicy
 
@@ -9,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class UserAuthorizationPolicy(AuthorizationPolicy):
     @classmethod
-    def get_principals(cls, request: RequestWithSession) -> tuple[str, ...]:
+    def get_principals(cls, request: Request) -> tuple[str, ...]:
         principals = super().get_principals(request)
 
         authenticated_user_id = request.user_id
@@ -29,3 +30,16 @@ class UserAuthorizationPolicy(AuthorizationPolicy):
         authenticated_user_id: str,
     ) -> tuple[str, ...]:
         return principals + (Authenticated, f"user:{authenticated_user_id}")
+
+
+class RecoverableUserAuthorizationPolicy(UserAuthorizationPolicy):
+    @classmethod
+    def get_principals(cls, request: Request) -> tuple[str, ...]:
+        if not request.recovery:
+            return super().get_principals(request)
+
+        principals = AuthorizationPolicy.get_principals(request) + (
+            f"recovering_user:{request.user_id}",
+        )
+        log.debug(f"Found principals: {principals}")
+        return principals

@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 import pytest
 from jose import jwt
 
-from coderfastapi.lib.security.policies.authentication.user import (
-    UserAuthenticationPolicy,
+from coderfastapi.lib.security.policies.authentication.jwt import (
+    JWTAuthenticationPolicy,
 )
 
 FAKE_KEY = "a877c2fd025963e0ac75aa867e290b7be3815ba9fd88d567fa6e0529721f33c9"
@@ -25,15 +25,21 @@ TOKEN_WITH_MALFORMED_USER_ID = (
 )
 
 
-def test_authenticate_request_success(request_with_session_mock):
+@pytest.mark.parametrize("recovery", [True, False])
+def test_authenticate_request_success(request_with_session_mock, recovery):
     user_id = uuid.uuid4()
-    policy = UserAuthenticationPolicy(FAKE_KEY)
-    access_token = policy.create_access_token(user_id, timedelta(minutes=1))
+    policy = JWTAuthenticationPolicy(FAKE_KEY)
+    access_token = policy.create_access_token(
+        user_id=user_id,
+        delta=timedelta(minutes=1),
+        recovery=recovery,
+    )
     request_with_session_mock.user_id = None
     request_with_session_mock.headers = {"authorization": f"Bearer {access_token}"}
 
     authenticated_connection = policy.authenticate_request(request_with_session_mock)
     assert authenticated_connection.user_id == user_id
+    assert authenticated_connection.recovery is recovery
     assert request_with_session_mock.user_id is None
 
 
@@ -49,7 +55,7 @@ def test_authenticate_request_success(request_with_session_mock):
     ],
 )
 def test_authenticate_request_failure(request_with_session_mock, headers):
-    policy = UserAuthenticationPolicy(FAKE_KEY)
+    policy = JWTAuthenticationPolicy(FAKE_KEY)
     request_with_session_mock.headers = headers
 
     unauthenticated_connection = policy.authenticate_request(request_with_session_mock)
@@ -57,21 +63,25 @@ def test_authenticate_request_failure(request_with_session_mock, headers):
     assert unauthenticated_connection.user_id is None
 
 
-def test_create_access_token(mocker):
-    user_id = uuid.uuid4()
-    policy = UserAuthenticationPolicy(FAKE_KEY)
+@pytest.mark.parametrize(
+    "recovery, user_id", ([(True, uuid.uuid4()), (False, None), (False, uuid.uuid4())])
+)
+def test_create_access_token(mocker, recovery, user_id):
+    policy = JWTAuthenticationPolicy(FAKE_KEY)
     now = datetime.utcnow()
     datetime_mock = mocker.patch(
-        "coderfastapi.lib.security.policies.authentication.user.datetime"
+        "coderfastapi.lib.security.policies.authentication.jwt.providers."
+        "expiration.datetime"
     )
     datetime_mock.utcnow.return_value = now
     delta = timedelta(minutes=1)
     expected_exp = now + delta
 
-    token = policy.create_access_token(user_id, delta)
+    token = policy.create_access_token(user_id=user_id, delta=delta, recovery=recovery)
 
     decoded = jwt.decode(token, FAKE_KEY, algorithms=[policy.algorithm])
     assert decoded == {
         "user_id": str(user_id),
         "exp": int(expected_exp.timestamp()),
+        "recovery": recovery,
     }
