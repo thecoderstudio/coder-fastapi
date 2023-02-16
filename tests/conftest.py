@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 
 from pytest import fixture
 
-from coderfastapi.lib.security.policies.authentication.user import (
-    UserAuthenticationPolicy,
+from coderfastapi.lib.security.policies.authentication.jwt import (
+    JWTAuthenticationPolicy,
 )
 from tests import create_request_with_session_mock
 
@@ -23,5 +23,5 @@ def jwt_secret() -> str:
 
 @fixture
 def access_token(jwt_secret: str) -> str:
-    policy = UserAuthenticationPolicy(jwt_secret)
-    return policy.create_access_token(uuid.uuid4(), timedelta(minutes=10))
+    policy = JWTAuthenticationPolicy(jwt_secret)
+    return policy.create_access_token(user_id=uuid.uuid4(), delta=timedelta(minutes=10))
