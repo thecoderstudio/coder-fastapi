@@ -48,7 +48,7 @@ class SecureRouter(APIRouter):
             context_acl_provider,
         )
 
-        kwargs = self._propagate_params(handler, kwargs, request, context)
+        kwargs = self._propagate_params(handler, kwargs, authenticated_request, context)
         output = handler(*args, **kwargs)
         if inspect.iscoroutine(output):
             output = await output
