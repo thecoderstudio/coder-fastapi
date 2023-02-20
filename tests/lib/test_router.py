@@ -1,5 +1,5 @@
 import pytest
-from fastapi import Depends
+from fastapi import Depends, Request
 
 from coderfastapi.lib.router import SecureRouter
 from coderfastapi.lib.security import Allow, Authenticated
@@ -114,7 +114,8 @@ async def test_secure_router_context_acl_provider_permissions(jwt_secret, access
         return expected_context
 
     @router.post("/test_async", permission="context_access")
-    async def async_endpoint_mock(context=Depends(get_context)):
+    async def async_endpoint_mock(request: Request, context=Depends(get_context)):
         assert context is expected_context
+        assert request == request_mock
 
     await async_endpoint_mock(request=request_mock, context=await get_context())

@@ -48,7 +48,7 @@ class SecureRouter(APIRouter):
             context_acl_provider,
         )
 
-        kwargs = self._propagate_context(handler, kwargs, context)
+        kwargs = self._propagate_params(handler, kwargs, request, context)
         output = handler(*args, **kwargs)
         if inspect.iscoroutine(output):
             output = await output
@@ -56,15 +56,18 @@ class SecureRouter(APIRouter):
         return output
 
     @staticmethod
-    def _propagate_context(
+    def _propagate_params(
         func: Callable[P, Awaitable[T] | T],
         kwargs: [str, Any],
+        request: Request,
         context: Any | None,
     ) -> dict[str, Any]:
         new_kwargs = copy.copy(kwargs)
         func_signature = inspect.signature(func)
         if func_signature.parameters.get("context"):
             new_kwargs["context"] = context
+        if func_signature.parameters.get("request"):
+            new_kwargs["request"] = request
         return new_kwargs
 
     def post(self, *outer_args, **outer_kwargs):
