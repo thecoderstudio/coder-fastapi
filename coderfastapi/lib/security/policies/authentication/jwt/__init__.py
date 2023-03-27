@@ -44,19 +44,29 @@ class JWTAuthenticationPolicy(AuthenticationPolicy):
 
     def authenticate_request(self, request: T) -> T:
         request_ = copy.copy(request)
-        decoded_data = self._decode_access_token(request_.headers)
+        auth_method, token = self._get_auth_method_and_token(request_.headers)
+        if auth_method == "Bearer":
+            request_ = self._authenticate_with_bearer(request, token)
+        return request_
+
+    @staticmethod
+    def _get_auth_method_and_token(
+        headers: dict[str, Any]
+    ) -> tuple[str, str] | tuple[None, None]:
+        try:
+            return get_auth_method_and_token(headers["authorization"])
+        except KeyError:
+            return (None, None)
+
+    def _authenticate_with_bearer(self, request: T, access_token: str) -> T:
+        request_ = request
+        decoded_data = self._decode_access_token(access_token)
         for provider in self.providers:
             request_ = provider.augment_request(request_, decoded_data)
         return request_
 
-    def _decode_access_token(self, headers: dict[str, Any]) -> dict[str, Any]:
+    def _decode_access_token(self, access_token: str) -> dict[str, Any]:
         try:
-            auth_method, access_token = get_auth_method_and_token(
-                headers["authorization"]
-            )
-            if auth_method != "Bearer":
-                return {}
-
             return jwt.decode(
                 access_token,
                 self.secret_key,
