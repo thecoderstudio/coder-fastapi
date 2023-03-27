@@ -80,7 +80,10 @@ class JWTAuthenticationPolicy(AuthenticationPolicy):
     def create_access_token(self, **kwargs) -> str:
         data = {}
         for provider in self.providers:
-            data.update(provider.parse_to_encode(kwargs))
+            try:
+                data.update(provider.parse_to_encode(kwargs))
+            except KeyError:
+                pass
         return self._create_token(data)
 
     def _create_token(self, data: dict[str, Any]) -> str:
