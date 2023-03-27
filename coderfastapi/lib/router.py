@@ -41,7 +41,7 @@ class SecureRouter(APIRouter):
         if isinstance(context, ACLProvider):
             context_acl_provider = context
 
-        authenticated_request = self.authentication_policy.authenticate_request(request)
+        authenticated_request = await self._authenticate_request(request)
         self.authorization_policy.validate_permission(
             permission,
             authenticated_request,
@@ -54,6 +54,9 @@ class SecureRouter(APIRouter):
             output = await output
 
         return output
+
+    async def _authenticate_request(self, request: Request) -> Request:
+        return self.authentication_policy.authenticate_request(request)
 
     @staticmethod
     def _propagate_params(
