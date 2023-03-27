@@ -80,7 +80,7 @@ class JWTAuthenticationPolicy(AuthenticationPolicy):
         data = {}
         for provider in self.providers:
             data.update(provider.parse_to_encode(kwargs))
-        return self._create_token(self, data)
+        return self._create_token(data)
 
     def _create_token(self, data: dict[str, Any]) -> str:
         return jwt.encode(data, self.secret_key, algorithm=self.algorithm)
