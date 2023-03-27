@@ -21,6 +21,11 @@ from coderfastapi.lib.security.policies.authentication.jwt.providers.user import
 
 log = logging.getLogger(__name__)
 T = TypeVar("T", bound=Request)
+DEFAULT_PROVIDERS: set[JWTDataProvider] = {
+    ExpirationDataProvider(),
+    RecoveryDataProvider(),
+    UserDataProvider(),
+}
 
 
 class JWTAuthenticationPolicy(AuthenticationPolicy):
@@ -32,11 +37,7 @@ class JWTAuthenticationPolicy(AuthenticationPolicy):
         self,
         secret_key: str,
         algorithm: str = "HS256",
-        providers: set[JWTDataProvider] = {
-            ExpirationDataProvider(),
-            RecoveryDataProvider(),
-            UserDataProvider(),
-        },
+        providers: set[JWTDataProvider] = DEFAULT_PROVIDERS,
     ) -> None:
         self.secret_key = secret_key
         self.algorithm = algorithm
