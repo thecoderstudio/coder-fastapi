@@ -1,5 +1,6 @@
 import copy
 import logging
+from collections import OrderedDict
 from typing import Any, TypeVar
 
 from fastapi import Request
@@ -78,7 +79,7 @@ class JWTAuthenticationPolicy(AuthenticationPolicy):
             return {}
 
     def create_access_token(self, **kwargs) -> str:
-        data = {}
+        data = OrderedDict()
         for provider in self.providers:
             try:
                 data.update(provider.parse_to_encode(kwargs))
