@@ -79,13 +79,13 @@ class JWTAuthenticationPolicy(AuthenticationPolicy):
             return {}
 
     def create_access_token(self, **kwargs) -> str:
-        data = OrderedDict()
+        data = {}
         for provider in self.providers:
             try:
                 data.update(provider.parse_to_encode(kwargs))
             except KeyError:
                 pass
-        return self._create_token(data)
+        return self._create_token(OrderedDict(sorted(data.items())))
 
     def _create_token(self, data: dict[str, Any]) -> str:
         return jwt.encode(data, self.secret_key, algorithm=self.algorithm)
