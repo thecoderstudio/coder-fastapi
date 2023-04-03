@@ -17,4 +17,4 @@ class RecoveryDataProvider(JWTDataProvider):
         return request_
 
     def parse_to_encode(self, data: dict[str, Any]) -> dict[str, Any]:
-        return {"recovery": data.get("recovery", False)}
+        return {"recovery": data["recovery"]}
