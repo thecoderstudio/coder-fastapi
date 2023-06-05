@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 import httpx
+import pytest
 from codercore.lib.collection import Direction
 from fastapi import Depends, Request
 
@@ -47,7 +48,9 @@ async def test_paginate_no_links(mocker):
     )
     response_mock = create_response_mock(mocker, request_mock)
     value = [Entity(id=1, value="a")]
+
     result = await decorated(request_mock, response_mock, value=value)
+
     assert result == value
     assert response_mock.headers == {}
 
@@ -60,7 +63,9 @@ async def test_paginate_next_link(mocker):
     )
     response_mock = create_response_mock(mocker, request_mock)
     value = [Entity(id=1, value="a")]
+
     result = await decorated(request_mock, response_mock, value=value)
+
     assert result == value
     assert_link_header(
         response_mock,
@@ -77,17 +82,95 @@ async def test_paginate_next_link(mocker):
     )
 
 
-async def test_paginate_previous_link():
-    pass
+async def test_paginate_previous_link(mocker):
+    limit = 2
+    value = [Entity(id=1, value="a"), Entity(id=2, value="b")]
+    request_mock = create_request_mock(
+        mocker,
+        QueryParameters(
+            cursor=CursorSchema(
+                last_id=str(value[0].id),
+                last_value=str(value[0].id),
+                direction=Direction.ASC,
+            ),
+            limit=limit,
+        ),
+    )
+    response_mock = create_response_mock(mocker, request_mock)
+
+    result = await decorated(request_mock, response_mock, value=value[1:])
+
+    assert result == value[1:]
+    assert_link_header(
+        response_mock,
+        {
+            "previous": {
+                "limit": limit,
+                "cursor": CursorSchema(
+                    last_id=str(value[1].id),
+                    last_value=str(value[1].id),
+                    direction=Direction.DESC,
+                ),
+            }
+        },
+    )
 
 
-async def test_paginate_full_links():
-    pass
+async def test_paginate_full_links(mocker):
+    limit = 1
+    value = [Entity(id=1, value="a"), Entity(id=2, value="b")]
+    request_mock = create_request_mock(
+        mocker,
+        QueryParameters(
+            cursor=CursorSchema(
+                last_id=str(value[0].id),
+                last_value=str(value[0].id),
+                direction=Direction.ASC,
+            ),
+            limit=limit,
+        ),
+    )
+    response_mock = create_response_mock(mocker, request_mock)
+
+    result = await decorated(request_mock, response_mock, value=value[1:])
+
+    assert result == value[1:]
+    assert_link_header(
+        response_mock,
+        {
+            "previous": {
+                "limit": limit,
+                "cursor": CursorSchema(
+                    last_id=str(value[1].id),
+                    last_value=str(value[1].id),
+                    direction=Direction.DESC,
+                ),
+            },
+            "next": {
+                "limit": limit,
+                "cursor": CursorSchema(
+                    last_id=str(value[-1].id),
+                    last_value=str(value[-1].id),
+                    direction=Direction.ASC,
+                ),
+            },
+        },
+    )
 
 
-async def test_paginate_full_links_alt_order_by():
-    pass
+async def test_paginate_query_schema_not_found(mocker):
+    limit = 2
+    request_mock = create_request_mock(
+        mocker,
+        QueryParameters(cursor=None, limit=limit),
+    )
+    response_mock = create_response_mock(mocker, request_mock)
+    value = [Entity(id=1, value="a"), Entity(id=2, value="b")]
 
+    async def decorated_without_schema(value: list[Entity]) -> list[Entity]:
+        return value
 
-async def test_paginate_query_schema_not_found():
-    pass
+    decorated_without_schema = paginate("id")(decorated_without_schema)
+
+    with pytest.raises(KeyError):
+        await decorated_without_schema(request_mock, response_mock, value=value)
