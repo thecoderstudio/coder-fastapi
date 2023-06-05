@@ -4,6 +4,8 @@ from typing import Awaitable, Callable, Optional, TypeVar
 
 from fastapi import HTTPException
 
+from coderfastapi.lib.decorators.pagination import paginate  # noqa
+
 T = TypeVar("T")
 
 
