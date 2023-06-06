@@ -1,4 +1,5 @@
-from inspect import signature
+from inspect import Parameter, Signature, signature
+from typing import Awaitable, Callable, Iterable, TypeVar
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from codercore.lib.collection import Direction
@@ -12,12 +13,28 @@ from coderfastapi.lib.validation.schemas.query import (
     QueryParameters,
 )
 
+T = TypeVar("T")
+S = TypeVar("S", bound=QueryParameters)
+Entities = Iterable[T]
 
-def paginate(id_attr: str):
-    def decorate(func):
+
+def paginate(
+    id_attr: str,
+) -> Callable[
+    [Callable[..., Awaitable[Entities]]],
+    Callable[[Request, Response, ...], Awaitable[Entities]],
+]:
+    def decorate(
+        func: Callable[..., Awaitable[Entities]]
+    ) -> Callable[[Request, Response, ...], Awaitable[Entities]]:
         func_signature = signature(func)
 
-        async def wrapped(request: Request, response: Response, *args, **kwargs):
+        async def wrapped(
+            request: Request,
+            response: Response,
+            *args,
+            **kwargs,
+        ) -> Entities:
             schema_name, query_schema = _get_query_schema(func_signature, request)
             kwargs[schema_name] = query_schema
 
@@ -37,14 +54,14 @@ def paginate(id_attr: str):
     return decorate
 
 
-def _get_query_schema(func_signature, request):
+def _get_query_schema(func_signature: Signature, request: Request) -> tuple[str, S]:
     for name, parameter in func_signature.parameters.items():
         if _is_valid_query_parameter(parameter):
             return (name, parameter.annotation(**dict(request.query_params)))
     raise KeyError("QuerySchema not found")
 
 
-def _is_valid_query_parameter(parameter):
+def _is_valid_query_parameter(parameter: Parameter) -> bool:
     return (
         isinstance(parameter.default, Depends)
         and parameter.default.dependency is None
@@ -52,7 +69,12 @@ def _is_valid_query_parameter(parameter):
     )
 
 
-def _build_links(id_attr, query_schema, request, result):
+def _build_links(
+    id_attr: str,
+    query_schema: S,
+    request: Request,
+    result: Entities,
+) -> list[str]:
     result_length = len(result)
     links = []
     value_attr = id_attr
@@ -70,25 +92,28 @@ def _build_links(id_attr, query_schema, request, result):
     return links
 
 
-def _create_cursor(direction, id_attr, value_attr, item):
-    return str(
-        CursorSchema(
-            last_id=str(getattr(item, id_attr)),
-            last_value=str(getattr(item, value_attr)),
-            direction=direction,
-        )
+def _create_cursor(
+    direction: Direction,
+    id_attr: str,
+    value_attr: str,
+    item: T,
+) -> CursorSchema:
+    return CursorSchema(
+        last_id=str(getattr(item, id_attr)),
+        last_value=str(getattr(item, value_attr)),
+        direction=direction,
     )
 
 
-def _construct_link(cursor, rel, request):
+def _construct_link(cursor: CursorSchema, rel: str, request: Request) -> str:
     url = _construct_url_with_cursor(cursor, request)
     return f'<{url}>; rel="{rel}"'
 
 
-def _construct_url_with_cursor(cursor, request):
+def _construct_url_with_cursor(cursor: CursorSchema, request: Request) -> str:
     scheme, netloc, path, query_string, fragment = urlsplit(str(request.url))
     query_params = parse_qs(query_string)
-    query_params["cursor"] = [cursor]
+    query_params["cursor"] = [str(cursor)]
 
     return urlunsplit(
         (
