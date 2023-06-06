@@ -30,6 +30,6 @@ class OrderableQueryParameters(QueryParameters):
 
     @validator("order_by")
     def validate_order_by(cls, v: str) -> str:
-        if v in ORDERABLE_PROPERTIES:
+        if v in cls._orderable_properties:
             return v
         raise ValueError(f"order_by must be one of {cls._orderable_properties}")

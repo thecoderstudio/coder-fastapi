@@ -6,7 +6,11 @@ from fastapi import Request, Response
 from fastapi.params import Depends
 
 from coderfastapi.lib.signature import copy_parameters
-from coderfastapi.lib.validation.schemas.query import CursorSchema, QueryParameters
+from coderfastapi.lib.validation.schemas.pagination import CursorSchema
+from coderfastapi.lib.validation.schemas.query import (
+    OrderableQueryParameters,
+    QueryParameters,
+)
 
 
 def paginate(id_attr: str):
@@ -51,24 +55,26 @@ def _is_valid_query_parameter(parameter):
 def _build_links(id_attr, query_schema, request, result):
     result_length = len(result)
     links = []
+    value_attr = id_attr
+    if isinstance(query_schema, OrderableQueryParameters):
+        value_attr = query_schema.order_by
 
     if query_schema.cursor and result_length >= 1:
-        cursor = _create_cursor(Direction.DESC, result, id_attr, 0)
+        cursor = _create_cursor(Direction.DESC, id_attr, value_attr, result[0])
         links.append(_construct_link(cursor, "previous", request))
 
     if result_length == query_schema.limit:
-        cursor = _create_cursor(Direction.ASC, result, id_attr, -1)
+        cursor = _create_cursor(Direction.ASC, id_attr, value_attr, result[-1])
         links.append(_construct_link(cursor, "next", request))
 
     return links
 
 
-def _create_cursor(direction, result, id_attr, index):
-    item = result[index]
+def _create_cursor(direction, id_attr, value_attr, item):
     return str(
         CursorSchema(
             last_id=str(getattr(item, id_attr)),
-            last_value=str(getattr(item, id_attr)),
+            last_value=str(getattr(item, value_attr)),
             direction=direction,
         )
     )

@@ -6,8 +6,16 @@ from codercore.lib.collection import Direction
 from fastapi import Depends, Request
 
 from coderfastapi.lib.decorators import paginate
-from coderfastapi.lib.validation.schemas.query import CursorSchema, QueryParameters
+from coderfastapi.lib.validation.schemas.pagination import CursorSchema
+from coderfastapi.lib.validation.schemas.query import (
+    OrderableQueryParameters,
+    QueryParameters,
+)
 from coderfastapi.test import assert_link_header
+
+
+class ListEntityParameters(OrderableQueryParameters):
+    _orderable_properties = ("value",)
 
 
 @dataclass
@@ -20,6 +28,14 @@ class Entity:
 async def decorated(
     value: list[Entity],
     params: QueryParameters = Depends(),
+) -> list[Entity]:
+    return value
+
+
+@paginate("id")
+async def decorated_orderable(
+    value: list[Entity],
+    params: ListEntityParameters = Depends(),
 ) -> list[Entity]:
     return value
 
@@ -75,6 +91,38 @@ async def test_paginate_next_link(mocker):
                 "cursor": CursorSchema(
                     last_id=str(value[0].id),
                     last_value=str(value[0].id),
+                    direction=Direction.ASC,
+                ),
+            }
+        },
+    )
+
+
+async def test_paginate_orderable_next_link(mocker):
+    limit = 1
+    request_mock = create_request_mock(
+        mocker,
+        ListEntityParameters(
+            cursor=None,
+            limit=limit,
+            order_direction=Direction.ASC,
+            order_by="value",
+        ),
+    )
+    response_mock = create_response_mock(mocker, request_mock)
+    value = [Entity(id=1, value="a")]
+
+    result = await decorated_orderable(request_mock, response_mock, value=value)
+
+    assert result == value
+    assert_link_header(
+        response_mock,
+        {
+            "next": {
+                "limit": limit,
+                "cursor": CursorSchema(
+                    last_id=str(value[0].id),
+                    last_value=str(value[0].value),
                     direction=Direction.ASC,
                 ),
             }
