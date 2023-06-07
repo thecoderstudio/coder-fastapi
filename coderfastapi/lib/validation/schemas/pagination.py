@@ -1,7 +1,6 @@
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from typing import Any, Callable, Iterator, Self
 
-import orjson
 from codercore.db.pagination import Cursor
 from codercore.lib.collection import Direction
 from pydantic import BaseModel
@@ -41,8 +40,8 @@ class CursorSchema(BaseModel, Cursor):
         }
 
     def encode(self) -> bytes:
-        return urlsafe_b64encode(orjson.dumps(self._dict()))
+        return urlsafe_b64encode(self.json().encode())
 
     @staticmethod
     def decode(v: bytes) -> Self:
-        return CursorSchema(**orjson.loads(urlsafe_b64decode(v)))
+        return CursorSchema.parse_raw(urlsafe_b64decode(v))

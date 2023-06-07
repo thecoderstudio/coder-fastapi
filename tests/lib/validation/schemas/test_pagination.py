@@ -1,6 +1,5 @@
 from base64 import urlsafe_b64encode
 
-import orjson
 from codercore.lib.collection import Direction
 
 from coderfastapi.lib.validation.schemas.pagination import CursorSchema
@@ -58,7 +57,7 @@ def test_cursor_schema_repr():
 
 def test_cursor_schema_encode():
     schema = CursorSchema(last_id="A", last_value=1, direction="asc")
-    expected_bytes = urlsafe_b64encode(orjson.dumps(schema._dict()))
+    expected_bytes = urlsafe_b64encode(schema.json().encode())
     assert schema.encode() == expected_bytes
 
 
