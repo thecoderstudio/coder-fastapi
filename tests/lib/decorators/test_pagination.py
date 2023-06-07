@@ -89,8 +89,8 @@ async def test_paginate_next_link(mocker):
             "next": {
                 "limit": limit,
                 "cursor": CursorSchema(
-                    last_id=str(value[0].id),
-                    last_value=str(value[0].id),
+                    last_id=value[0].id,
+                    last_value=value[0].id,
                     direction=Direction.ASC,
                 ),
             }
@@ -121,8 +121,8 @@ async def test_paginate_orderable_next_link(mocker):
             "next": {
                 "limit": limit,
                 "cursor": CursorSchema(
-                    last_id=str(value[0].id),
-                    last_value=str(value[0].value),
+                    last_id=value[0].id,
+                    last_value=value[0].value,
                     direction=Direction.ASC,
                 ),
             }
@@ -137,8 +137,8 @@ async def test_paginate_previous_link(mocker):
         mocker,
         QueryParameters(
             cursor=CursorSchema(
-                last_id=str(value[0].id),
-                last_value=str(value[0].id),
+                last_id=value[0].id,
+                last_value=value[0].id,
                 direction=Direction.ASC,
             ),
             limit=limit,
@@ -155,8 +155,8 @@ async def test_paginate_previous_link(mocker):
             "previous": {
                 "limit": limit,
                 "cursor": CursorSchema(
-                    last_id=str(value[1].id),
-                    last_value=str(value[1].id),
+                    last_id=value[1].id,
+                    last_value=value[1].id,
                     direction=Direction.DESC,
                 ),
             }
@@ -171,8 +171,8 @@ async def test_paginate_full_links(mocker):
         mocker,
         QueryParameters(
             cursor=CursorSchema(
-                last_id=str(value[0].id),
-                last_value=str(value[0].id),
+                last_id=value[0].id,
+                last_value=value[0].id,
                 direction=Direction.ASC,
             ),
             limit=limit,
@@ -189,16 +189,16 @@ async def test_paginate_full_links(mocker):
             "previous": {
                 "limit": limit,
                 "cursor": CursorSchema(
-                    last_id=str(value[1].id),
-                    last_value=str(value[1].id),
+                    last_id=value[1].id,
+                    last_value=value[1].id,
                     direction=Direction.DESC,
                 ),
             },
             "next": {
                 "limit": limit,
                 "cursor": CursorSchema(
-                    last_id=str(value[-1].id),
-                    last_value=str(value[-1].id),
+                    last_id=value[-1].id,
+                    last_value=value[-1].id,
                     direction=Direction.ASC,
                 ),
             },

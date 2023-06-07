@@ -99,8 +99,8 @@ def _create_cursor(
     item: T,
 ) -> CursorSchema:
     return CursorSchema(
-        last_id=str(getattr(item, id_attr)),
-        last_value=str(getattr(item, value_attr)),
+        last_id=getattr(item, id_attr),
+        last_value=getattr(item, value_attr),
         direction=direction,
     )
 
