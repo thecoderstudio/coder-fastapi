@@ -4,6 +4,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from codercore.lib.collection import Direction
 from fastapi import Request, Response
+from fastapi.params import Depends
 
 from coderfastapi.lib.signature import copy_parameters
 from coderfastapi.lib.validation.schemas.pagination import CursorSchema
@@ -35,7 +36,10 @@ def paginate(
             **kwargs,
         ) -> Entities:
             schema_name, query_schema = _get_query_schema(func_signature, request)
-            kwargs[schema_name] = query_schema
+            if query_schema:
+                kwargs[schema_name] = query_schema
+            else:
+                query_schema = kwargs[schema_name]
 
             result = await func(*args, **kwargs)
             links = _build_links(id_attr, query_schema, request, result)
@@ -56,13 +60,22 @@ def paginate(
 def _get_query_schema(func_signature: Signature, request: Request) -> tuple[str, S]:
     for name, parameter in func_signature.parameters.items():
         if _is_valid_query_parameter(parameter):
-            return (name, parameter.annotation(**dict(request.query_params)))
+            if _is_injectable(parameter):
+                return (name, parameter.annotation(**dict(request.query_params)))
+            else:
+                return (name, None)
     raise KeyError("QuerySchema not found")
 
 
 def _is_valid_query_parameter(parameter: Parameter) -> bool:
     return isclass(parameter.annotation) and issubclass(
         parameter.annotation, QueryParameters
+    )
+
+
+def _is_injectable(parameter) -> bool:
+    return (
+        isinstance(parameter.default, Depends) and parameter.default.dependency is None
     )
 
 

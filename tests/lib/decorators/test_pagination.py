@@ -40,6 +40,14 @@ async def decorated_orderable(
     return value
 
 
+@paginate("id")
+async def decorated_not_injectable(
+    value: list[Entity],
+    params: QueryParameters,
+) -> list[Entity]:
+    return value
+
+
 def create_request_mock(mocker, params: QueryParameters):
     request_mock = mocker.MagicMock()
     request_mock.query_params = params.dict()
@@ -69,6 +77,36 @@ async def test_paginate_no_links(mocker):
 
     assert result == value
     assert response_mock.headers == {}
+
+
+async def test_paginate_not_injectable(mocker):
+    limit = 1
+    params = QueryParameters(cursor=None, limit=limit)
+    request_mock = create_request_mock(mocker, params)
+    response_mock = create_response_mock(mocker, request_mock)
+    value = [Entity(id=1, value="a")]
+
+    result = await decorated_not_injectable(
+        request_mock,
+        response_mock,
+        value=value,
+        params=params,
+    )
+
+    assert result == value
+    assert_link_header(
+        response_mock,
+        {
+            "next": {
+                "limit": limit,
+                "cursor": CursorSchema(
+                    last_id=value[0].id,
+                    last_value=value[0].id,
+                    direction=Direction.ASC,
+                ),
+            }
+        },
+    )
 
 
 async def test_paginate_next_link(mocker):
