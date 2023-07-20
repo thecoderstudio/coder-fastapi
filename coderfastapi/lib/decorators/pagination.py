@@ -1,10 +1,9 @@
-from inspect import Parameter, Signature, signature
+from inspect import Parameter, Signature, isclass, signature
 from typing import Awaitable, Callable, Iterable, TypeVar
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from codercore.lib.collection import Direction
 from fastapi import Request, Response
-from fastapi.params import Depends
 
 from coderfastapi.lib.signature import copy_parameters
 from coderfastapi.lib.validation.schemas.pagination import CursorSchema
@@ -62,10 +61,8 @@ def _get_query_schema(func_signature: Signature, request: Request) -> tuple[str,
 
 
 def _is_valid_query_parameter(parameter: Parameter) -> bool:
-    return (
-        isinstance(parameter.default, Depends)
-        and parameter.default.dependency is None
-        and issubclass(parameter.annotation, QueryParameters)
+    return isclass(parameter.annotation) and issubclass(
+        parameter.annotation, QueryParameters
     )
 
 
