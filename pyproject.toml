@@ -11,6 +11,7 @@ authors = [{ name = "Code R", email = "hello@coderstudio.dev" }]
 dependencies = [
     'codercore ~= 3.0',
     'fastapi[all] ~= 0.89',
+    'google-cloud-logging ~= 3.7',
     'orjson ~= 3.8',
     'pydantic ~= 1.10',
     'python-jose ~= 3.3',
