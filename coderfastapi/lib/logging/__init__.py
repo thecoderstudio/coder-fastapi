@@ -1,6 +1,9 @@
 import os
 
 import google.cloud.logging
+from google.cloud.logging_v2.handlers import CloudLoggingFilter
+
+CLOUD_RUN_INDICATOR = "K_SERVICE"
 
 
 def setup_cloud_logging():
@@ -11,4 +14,4 @@ def setup_cloud_logging():
 
 
 def _is_running_in_cloud_environment() -> bool:
-    return bool(os.environ.get("K_SERVICE"))
+    return bool(os.environ.get(CLOUD_RUN_INDICATOR))
