@@ -12,8 +12,9 @@ class CloudLoggingFilter(GoogleCloudLoggingFilter):
         record.http_request = http_request_context.get()
 
         trace_id, span_id = cloud_trace_context.get()
-        record.trace = f"projects/{self.project}/traces/{trace_id}"
-        record.span_id = span_id
+        if trace_id:
+            record.trace = f"projects/{self.project}/traces/{trace_id}"
+            record.span_id = span_id
 
         super().filter(record)
         return True
