@@ -21,6 +21,10 @@ class CloudTraceContext:
 
         self._context_var.set((trace_id, span_id))
 
+    @property
+    def name(self) -> str:
+        return self._context_var.name
+
 
 cloud_trace_context = CloudTraceContext(CLOUD_TRACE_CONTEXT_NAME)
 http_request_context = ContextVar(HTTP_REQUEST_CONTEXT_NAME, default=None)
