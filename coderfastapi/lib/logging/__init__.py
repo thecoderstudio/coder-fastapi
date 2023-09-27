@@ -1,7 +1,6 @@
 import os
 
 import google.cloud.logging
-from google.cloud.logging_v2.handlers import CloudLoggingFilter
 
 CLOUD_RUN_INDICATOR = "K_SERVICE"
 

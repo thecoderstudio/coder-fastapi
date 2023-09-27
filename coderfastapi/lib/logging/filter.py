@@ -1,5 +1,4 @@
 import logging
-import re
 
 from google.cloud.logging_v2.handlers import (
     CloudLoggingFilter as GoogleCloudLoggingFilter,
@@ -12,13 +11,9 @@ class CloudLoggingFilter(GoogleCloudLoggingFilter):
     def filter(self, record: logging.LogRecord) -> bool:
         record.http_request = http_request_context.get()
 
-        trace = cloud_trace_context.get()
-        split_header = trace.split("/", 1)
-
-        record.trace = f"projects/{self.project}/traces/{split_header[0]}"
-
-        header_suffix = split_header[1]
-        record.span_id = re.findall(r"^\w+", header_suffix)[0]
+        trace_id, span_id = cloud_trace_context.get()
+        record.trace = f"projects/{self.project}/traces/{trace_id}"
+        record.span_id = span_id
 
         super().filter(record)
         return True
