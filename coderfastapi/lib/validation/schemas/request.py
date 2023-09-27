@@ -1,32 +1,28 @@
 import sys
+from ipaddress import IPv4Address, IPv6Address
+from typing import Self
 
-from pydantic import BaseModel, root_validator
+from pydantic import AnyHttpUrl, BaseModel, Field
 from starlette.requests import Request
 
 
 class HTTPRequestSchema(BaseModel):
-    request_method: str
-    request_url: str
-    request_size: int
-    remote_ip: str
+    request_method: str = Field(alias="requestMethod")
+    request_url: AnyHttpUrl = Field(alias="requestUrl")
+    request_size: int = Field(alias="requestSize")
+    remote_ip: IPv4Address | IPv6Address | None = Field(alias="remoteIp")
     protocol: str
-    referrer: str
-    user_agent: str
+    referrer: str | None
+    user_agent: str | None = Field(alias="userAgent")
 
-    @root_validator(pre=True)
-    def parse_request(cls, request: Request):
-        values = {
-            "request_method": request.method,
-            "request_url": request.url.path,
-            "request_size": sys.getsizeof(request),
-            "remote_ip": request.client.host,
-            "protocol": request.url.scheme,
-        }
-
-        if "referrer" in request.headers:
-            values["referrer"] = request.headers["referrer"]
-
-        if "user-agent" in request.headers:
-            values["userAgent"] = request.headers["user-agent"]
-
-        return values
+    @classmethod
+    def from_request(cls, request: Request) -> Self:
+        return cls(
+            requestMethod=request.method,
+            requestUrl=str(request.url),
+            requestSize=sys.getsizeof(request),
+            remoteIp=request.client.host,
+            protocol=request.url.scheme,
+            referrer=request.headers.get("referrer"),
+            userAgent=request.headers.get("user-agent"),
+        )
