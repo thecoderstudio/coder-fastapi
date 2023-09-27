@@ -8,7 +8,7 @@ HTTP_REQUEST_CONTEXT_NAME = "http_request_context"
 class CloudTraceContext:
     _context_var: ContextVar
 
-    def __init__(self, name) -> None:
+    def __init__(self, name: str) -> None:
         self._context_var = ContextVar(name, default=(None, None))
 
     def get(self) -> tuple[str | None, str | None]:
