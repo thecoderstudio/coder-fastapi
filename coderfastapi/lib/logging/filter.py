@@ -10,11 +10,12 @@ from coderfastapi.lib.logging.context import cloud_trace_context, http_request_c
 
 class CloudLoggingFilter(GoogleCloudLoggingFilter):
     def filter(self, record: logging.LogRecord) -> bool:
-        record.http_request = http_request_context.get()
-
         trace_id, span_id = cloud_trace_context.get()
         if trace_id:
             record = self._add_trace_data(record, trace_id, span_id)
+
+        if http_request := http_request_context.get():
+            record.http_request = http_request.dict(by_alias=True)
 
         super().filter(record)
         return True

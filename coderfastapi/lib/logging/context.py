@@ -23,4 +23,4 @@ class CloudTraceContext:
 
 
 cloud_trace_context = CloudTraceContext(CLOUD_TRACE_CONTEXT_NAME)
-http_request_context = ContextVar(HTTP_REQUEST_CONTEXT_NAME, default={})
+http_request_context = ContextVar(HTTP_REQUEST_CONTEXT_NAME, default=None)
