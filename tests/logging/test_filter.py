@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from coderfastapi.lib.logging.filter import CloudLoggingFilter
+from coderfastapi.logging.filter import CloudLoggingFilter
 
 
 def test_cloud_logging_filter_minimal(mocker):
@@ -12,7 +12,7 @@ def test_cloud_logging_filter_minimal(mocker):
     request_context_mock.get.return_value = None
 
     with patch(
-        "coderfastapi.lib.logging.filter.GoogleCloudLoggingFilter.filter",
+        "coderfastapi.logging.filter.GoogleCloudLoggingFilter.filter",
         return_value=True,
     ):
         assert CloudLoggingFilter(
@@ -38,7 +38,7 @@ def test_cloud_logging_filter_complete(mocker):
     request_context_mock.get.return_value = http_request_schema_mock
 
     with patch(
-        "coderfastapi.lib.logging.filter.GoogleCloudLoggingFilter.filter",
+        "coderfastapi.logging.filter.GoogleCloudLoggingFilter.filter",
         return_value=True,
     ):
         assert CloudLoggingFilter(

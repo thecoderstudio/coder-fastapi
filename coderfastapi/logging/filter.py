@@ -5,7 +5,7 @@ from google.cloud.logging_v2.handlers import (
     CloudLoggingFilter as GoogleCloudLoggingFilter,
 )
 
-from coderfastapi.lib.logging.context import CloudTraceContext
+from coderfastapi.logging.context import CloudTraceContext
 
 
 class CloudLoggingFilter(GoogleCloudLoggingFilter):

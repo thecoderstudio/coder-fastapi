@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from coderfastapi.lib.logging.middleware import TRACE_HEADER, LoggingMiddleware
+from coderfastapi.logging.middleware import TRACE_HEADER, LoggingMiddleware
 
 
 async def test_logging_middleware_dispatch(mocker):
@@ -17,7 +17,7 @@ async def test_logging_middleware_dispatch(mocker):
     )
 
     with patch(
-        "coderfastapi.lib.logging.middleware.HTTPRequestSchema.from_request"
+        "coderfastapi.logging.middleware.HTTPRequestSchema.from_request"
     ) as schema_from_request_mock:
         await logging_middleware.dispatch(request_mock, call_next_mock)
 
@@ -43,7 +43,7 @@ async def test_logging_middleware_dispatch_without_cloud_trace(mocker):
     )
 
     with patch(
-        "coderfastapi.lib.logging.middleware.HTTPRequestSchema.from_request"
+        "coderfastapi.logging.middleware.HTTPRequestSchema.from_request"
     ) as schema_from_request_mock:
         await logging_middleware.dispatch(request_mock, call_next_mock)
 

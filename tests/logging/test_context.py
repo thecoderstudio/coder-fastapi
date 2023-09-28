@@ -1,4 +1,4 @@
-from coderfastapi.lib.logging.context import (
+from coderfastapi.logging.context import (
     CLOUD_TRACE_CONTEXT_NAME,
     HTTP_REQUEST_CONTEXT_NAME,
     cloud_trace_context,

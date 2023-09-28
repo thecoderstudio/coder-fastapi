@@ -4,8 +4,8 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import Response
 
-from coderfastapi.lib.logging.context import CloudTraceContext
 from coderfastapi.lib.validation.schemas.request import HTTPRequestSchema
+from coderfastapi.logging.context import CloudTraceContext
 
 TRACE_HEADER = "x-cloud-trace-context"
 
