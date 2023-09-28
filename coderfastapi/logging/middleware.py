@@ -1,8 +1,9 @@
 from contextvars import ContextVar
 
+from fastapi.logger import logger
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import JSONResponse, Response
 
 from coderfastapi.lib.validation.schemas.request import HTTPRequestSchema
 from coderfastapi.logging.context import CloudTraceContext
@@ -33,4 +34,10 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         self.http_request_context.set(HTTPRequestSchema.from_request(request))
 
-        return await call_next(request)
+        try:
+            return await call_next(request)
+        except Exception as e:
+            logger.debug(f"Request failed: {e}")
+            return JSONResponse(
+                status_code=500, content={"success": False, "message": e}
+            )
