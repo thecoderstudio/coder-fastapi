@@ -9,7 +9,7 @@ from coderfastapi.lib.logging.filter import CloudLoggingFilter
 CLOUD_RUN_INDICATOR = "K_SERVICE"
 
 
-def setup_cloud_logging():
+def setup_cloud_logging() -> None:
     if not _is_running_in_cloud_environment():
         return
     client = Client()
