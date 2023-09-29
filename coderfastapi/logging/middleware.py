@@ -1,7 +1,10 @@
 from collections.abc import Callable
 from contextvars import ContextVar
+from http import HTTPStatus
 
+from fastapi.logger import logger
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 from starlette.types import ASGIApp
 
 from coderfastapi.lib.validation.schemas.request import HTTPRequestSchema
@@ -38,4 +41,12 @@ class LoggingMiddleware:
 
         self.http_request_context.set(HTTPRequestSchema.from_request(request))
 
-        await self.app(scope, receive, send)
+        try:
+            await self.app(scope, receive, send)
+        except Exception:
+            logger.exception(INTERNAL_SERVER_ERROR)
+            response = JSONResponse(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                content=INTERNAL_SERVER_ERROR,
+            )
+            await response(scope, receive, send)
