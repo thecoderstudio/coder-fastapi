@@ -1,7 +1,7 @@
+import logging
 from contextvars import ContextVar
 from http import HTTPStatus
 
-from fastapi.logger import logger
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -10,6 +10,7 @@ from coderfastapi.lib.validation.schemas.request import HTTPRequestSchema
 from coderfastapi.logging.context import CloudTraceContext
 
 TRACE_HEADER = "x-cloud-trace-context"
+INTERNAL_SERVER_ERROR = "Internal Server Error"
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
@@ -38,8 +39,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         try:
             return await call_next(request)
         except Exception:
-            logger.exception("Request failed")
+            logging.exception(INTERNAL_SERVER_ERROR)
             return JSONResponse(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                content="Internal Server Error",
+                content=INTERNAL_SERVER_ERROR,
             )

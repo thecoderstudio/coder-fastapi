@@ -5,6 +5,7 @@ from google.cloud.logging_v2.handlers import setup_logging
 
 from coderfastapi.logging.context import cloud_trace_context, http_request_context
 from coderfastapi.logging.filter import CloudLoggingFilter
+from coderfastapi.logging.middleware import LoggingMiddleware  # noqa
 
 CLOUD_RUN_INDICATOR = "K_SERVICE"
 
