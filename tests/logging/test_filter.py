@@ -31,6 +31,7 @@ def test_cloud_logging_filter_complete(mocker):
     trace_id = "TRACE_ID"
     span_id = "SPAN_ID"
     http_request_schema_mock = mocker.MagicMock()
+    http_request_schema_mock.json.return_value = '"http request"'
     record = mocker.MagicMock(trace=None, span_id=None, http_request=None)
     trace_context_mock = mocker.MagicMock()
     request_context_mock = mocker.MagicMock()
@@ -49,4 +50,4 @@ def test_cloud_logging_filter_complete(mocker):
 
     assert record.trace == f"projects/{project}/traces/{trace_id}"
     assert record.span_id == span_id
-    assert record.http_request == http_request_schema_mock.json(by_alias=True)
+    assert record.http_request == "http request"
