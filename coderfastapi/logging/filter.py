@@ -29,7 +29,7 @@ class CloudLoggingFilter(GoogleCloudLoggingFilter):
             record = self._add_trace_data(record, trace_id, span_id)
 
         if http_request := self.http_request_context.get():
-            record.http_request = http_request.dict(by_alias=True)
+            record.http_request = http_request.json(by_alias=True)
 
         super().filter(record)
         return True

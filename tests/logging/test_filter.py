@@ -49,4 +49,4 @@ def test_cloud_logging_filter_complete(mocker):
 
     assert record.trace == f"projects/{project}/traces/{trace_id}"
     assert record.span_id == span_id
-    assert record.http_request == http_request_schema_mock.dict(by_alias=True)
+    assert record.http_request == http_request_schema_mock.json(by_alias=True)

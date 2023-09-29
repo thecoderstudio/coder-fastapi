@@ -1,5 +1,5 @@
+import json
 import sys
-from ipaddress import IPv4Address
 
 from starlette.datastructures import URL
 
@@ -23,15 +23,17 @@ def test_http_request_schema_from_request_complete(mocker):
     )
 
     schema = HTTPRequestSchema.from_request(request)
-    assert schema.dict(by_alias=True) == {
-        "requestMethod": request_method,
-        "requestUrl": request_url,
-        "requestSize": sys.getsizeof(request),
-        "remoteIp": IPv4Address(remote_ip),
-        "protocol": "http",
-        "referrer": referrer,
-        "userAgent": user_agent,
-    }
+    assert schema.json(by_alias=True) == json.dumps(
+        {
+            "requestMethod": request_method,
+            "requestUrl": request_url,
+            "requestSize": sys.getsizeof(request),
+            "remoteIp": remote_ip,
+            "protocol": "http",
+            "referrer": referrer,
+            "userAgent": user_agent,
+        }
+    )
 
 
 def test_http_request_schema_from_request_minimal(mocker):
