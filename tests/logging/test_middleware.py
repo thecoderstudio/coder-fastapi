@@ -1,6 +1,11 @@
+from http import HTTPStatus
 from unittest.mock import patch
 
-from coderfastapi.logging.middleware import TRACE_HEADER, LoggingMiddleware
+from coderfastapi.logging.middleware import (
+    INTERNAL_SERVER_ERROR,
+    TRACE_HEADER,
+    LoggingMiddleware,
+)
 
 
 async def test_logging_middleware_call(mocker):
@@ -68,6 +73,39 @@ async def test_logging_middleware_call_without_cloud_trace(mocker):
     )
     request_init_mock.assert_called_once_with(scope, receive=receive_mock)
     app_mock.assert_awaited_once_with(scope, receive_mock, send_mock)
+
+
+async def test_logging_middleware_call_app_exception_thrown(mocker):
+    scope = {"type": "http"}
+    app_mock = mocker.AsyncMock()
+    app_mock.side_effect = ValueError()
+    receive_mock = mocker.MagicMock()
+    send_mock = mocker.MagicMock()
+    trace_context_mock = mocker.MagicMock()
+    request_context_mock = mocker.MagicMock()
+    json_response_mock = mocker.AsyncMock()
+    logging_middleware = LoggingMiddleware(
+        app=app_mock,
+        cloud_trace_context=trace_context_mock,
+        http_request_context=request_context_mock,
+    )
+
+    with (
+        patch("coderfastapi.logging.middleware.HTTPRequestSchema.from_request"),
+        patch("coderfastapi.logging.middleware.Request"),
+        patch("coderfastapi.logging.middleware.logger") as logger_mock,
+        patch(
+            "coderfastapi.logging.middleware.JSONResponse",
+            return_value=json_response_mock,
+        ) as json_response_init_mock,
+    ):
+        await logging_middleware.__call__(scope, receive_mock, send_mock)
+
+    logger_mock.exception.assert_called_once_with(INTERNAL_SERVER_ERROR)
+    json_response_init_mock.assert_called_once_with(
+        status_code=HTTPStatus.INTERNAL_SERVER_ERROR, content=INTERNAL_SERVER_ERROR
+    )
+    json_response_mock.assert_awaited_once_with(scope, receive_mock, send_mock)
 
 
 async def test_logging_middleware_call_not_http_request(mocker):
