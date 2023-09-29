@@ -1,4 +1,5 @@
 from contextvars import ContextVar
+from http import HTTPStatus
 
 from fastapi.logger import logger
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -36,8 +37,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         try:
             return await call_next(request)
-        except Exception as e:
-            logger.debug(f"Request failed: {e}")
+        except Exception:
+            logger.exception("Request failed")
             return JSONResponse(
-                status_code=500, content={"success": False, "message": e}
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                content="Internal Server Error",
             )
