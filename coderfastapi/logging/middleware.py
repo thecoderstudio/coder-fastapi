@@ -32,15 +32,28 @@ class LoggingMiddleware:
         self.http_request_context = http_request_context
 
     async def __call__(self, scope: dict, receive: Callable, send: Callable) -> None:
-        if scope["type"] != "http":
+        if not self._is_http_request(scope):
             return await self.app(scope, receive, send)
 
-        request = Request(scope, receive=receive)
+        self._set_context(Request(scope, receive=receive))
+        await self._call_upstream(scope, receive, send)
+
+    @staticmethod
+    def _is_http_request(scope: dict) -> bool:
+        return bool(scope["type"] == "http")
+
+    def _set_context(self, request: Request) -> None:
         if TRACE_HEADER in request.headers:
             self.cloud_trace_context.set(request.headers[TRACE_HEADER])
 
         self.http_request_context.set(HTTPRequestSchema.from_request(request))
 
+    async def _call_upstream(
+        self,
+        scope: dict,
+        receive: Callable,
+        send: Callable,
+    ) -> None:
         try:
             await self.app(scope, receive, send)
         except Exception:
