@@ -2,8 +2,9 @@ import uuid
 
 import pytest
 from codercore.lib.collection import Direction
+from codercore.test.pydantic import check_validation_value_error
 
-from coderfastapi.lib.validation.schemas.pagination import CursorSchema
+from coderfastapi.lib.validation.schemas.pagination import SerializableCursor
 from coderfastapi.lib.validation.schemas.query import (
     DEFAULT_LIMIT,
     MAX_LIMIT,
@@ -14,7 +15,7 @@ from coderfastapi.lib.validation.schemas.query import (
 
 
 def test_query_parameters_load():
-    cursor = CursorSchema(
+    cursor = SerializableCursor(
         last_id=str(uuid.uuid4()),
         last_value="a",
         direction="asc",
@@ -38,13 +39,12 @@ def test_query_parameters_load_defaults():
 def test_query_parameters_limit_out_of_bounds(limit):
     with pytest.raises(ValueError) as e:
         QueryParameters(limit=limit)
-    assert e.value.errors() == [
-        {
-            "loc": ("limit",),
-            "msg": f"ensure limit is >= 1 and <= {MAX_LIMIT}",
-            "type": "value_error",
-        }
-    ]
+    assert check_validation_value_error(
+        e.value,
+        ("limit",),
+        f"ensure limit is >= 1 and <= {MAX_LIMIT}",
+        limit,
+    )
 
 
 def test_orderable_query_parameters_load():
@@ -67,10 +67,9 @@ def test_orderable_query_parameters_invalid_order_by():
     with pytest.raises(ValueError) as e:
         OrderableQueryParameters(order_by="wrong")
 
-    assert e.value.errors() == [
-        {
-            "loc": ("order_by",),
-            "msg": f"order_by must be one of {ORDERABLE_PROPERTIES}",
-            "type": "value_error",
-        }
-    ]
+    assert check_validation_value_error(
+        e.value,
+        ("order_by",),
+        f"order_by must be one of {ORDERABLE_PROPERTIES}",
+        "wrong",
+    )

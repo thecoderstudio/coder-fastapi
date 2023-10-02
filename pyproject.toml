@@ -9,7 +9,7 @@ description = "coderfastapi"
 readme = "README.md"
 authors = [{ name = "Code R", email = "hello@coderstudio.dev" }]
 dependencies = [
-    'codercore ~= 4.0',
+    'codercore ~= 4.2',
     'fastapi[all] ~= 0.89',
     'google-cloud-logging ~= 3.7',
     'orjson ~= 3.8',
