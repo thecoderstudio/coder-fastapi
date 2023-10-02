@@ -1,66 +1,36 @@
-from base64 import urlsafe_b64encode
-
 from codercore.lib.collection import Direction
+from pydantic import TypeAdapter
 
-from coderfastapi.lib.validation.schemas.pagination import CursorSchema
+from coderfastapi.lib.validation.schemas.pagination import SerializableCursor
 
 
-def test_cursor_schema_load():
+def test_serializable_cursor_init():
     last_id = "A"
     last_value = 1
     direction = Direction.ASC
-    schema = CursorSchema(
+    cursor = SerializableCursor(
         last_id=last_id,
         last_value=last_value,
         direction=direction,
     )
-    assert schema.last_id == last_id
-    assert schema.last_value == last_value
-    assert schema.direction == direction
+    assert cursor.last_id == last_id
+    assert cursor.last_value == last_value
+    assert cursor.direction == direction
 
 
-def test_cursor_schema_validate():
-    schema = CursorSchema(last_id="A", last_value=1, direction="asc")
-    assert CursorSchema.validate(schema) == schema
+def test_serializable_cursor_serialize():
+    type_adapter = TypeAdapter(SerializableCursor)
+    cursor = SerializableCursor(last_id="A", last_value=1, direction="asc")
+    assert type_adapter.validate_python(cursor) == cursor
 
 
-def test_cursor_schema_validate_from_base64_str():
-    schema = CursorSchema(last_id="A", last_value=1, direction="asc")
-    assert CursorSchema.validate(str(schema)) == schema
+def test_serializable_cursor_serialize_from_base64_str():
+    type_adapter = TypeAdapter(SerializableCursor)
+    cursor = SerializableCursor(last_id="A", last_value=1, direction="asc")
+    assert type_adapter.validate_python(str(cursor)) == cursor
 
 
-def test_cursor_schema_validate_from_base64_bytes():
-    schema = CursorSchema(last_id="A", last_value=1, direction="asc")
-    assert CursorSchema.validate(bytes(schema)) == schema
-
-
-def test_cursor_schema_bytes():
-    schema = CursorSchema(last_id="A", last_value=1, direction="asc")
-    assert bytes(schema) == schema.encode()
-
-
-def test_cursor_schema_str():
-    schema = CursorSchema(last_id="A", last_value=1, direction="asc")
-    assert str(schema) == schema.encode().decode()
-
-
-def test_cursor_schema_repr():
-    schema = CursorSchema(last_id="A", last_value=1, direction="asc")
-    assert repr(schema) == str(
-        {
-            "last_id": schema.last_id,
-            "last_value": schema.last_value,
-            "direction": schema.direction,
-        }
-    )
-
-
-def test_cursor_schema_encode():
-    schema = CursorSchema(last_id="A", last_value=1, direction="asc")
-    expected_bytes = urlsafe_b64encode(schema.json().encode())
-    assert schema.encode() == expected_bytes
-
-
-def test_cursor_schema_decode():
-    schema = CursorSchema(last_id="A", last_value=1, direction="asc")
-    assert schema.decode(schema.encode()) == schema
+def test_serializable_cursor_serialize_from_base64_bytes():
+    type_adapter = TypeAdapter(SerializableCursor)
+    cursor = SerializableCursor(last_id="A", last_value=1, direction="asc")
+    assert type_adapter.validate_python(bytes(cursor)) == cursor
