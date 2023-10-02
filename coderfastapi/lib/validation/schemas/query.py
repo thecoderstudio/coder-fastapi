@@ -3,7 +3,7 @@ from typing import ClassVar
 from codercore.lib.collection import Direction
 from pydantic import BaseModel, validator
 
-from coderfastapi.lib.validation.schemas.pagination import SerializableCursor
+from coderfastapi.lib.validation.schemas.pagination import DeserializableCursor
 
 MAX_LIMIT = 100
 DEFAULT_LIMIT = 25
@@ -14,7 +14,7 @@ ORDERABLE_PROPERTIES = (DEFAULT_ORDER_BY,)
 class QueryParameters(BaseModel):
     _max_limit: ClassVar[int] = MAX_LIMIT
 
-    cursor: SerializableCursor | None = None
+    cursor: DeserializableCursor | None = None
     limit: int = DEFAULT_LIMIT
 
     @validator("limit")

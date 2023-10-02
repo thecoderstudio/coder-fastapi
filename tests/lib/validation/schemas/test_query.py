@@ -4,7 +4,7 @@ import pytest
 from codercore.lib.collection import Direction
 from codercore.test.pydantic import check_validation_value_error
 
-from coderfastapi.lib.validation.schemas.pagination import SerializableCursor
+from coderfastapi.lib.validation.schemas.pagination import DeserializableCursor
 from coderfastapi.lib.validation.schemas.query import (
     DEFAULT_LIMIT,
     MAX_LIMIT,
@@ -15,7 +15,7 @@ from coderfastapi.lib.validation.schemas.query import (
 
 
 def test_query_parameters_load():
-    cursor = SerializableCursor(
+    cursor = DeserializableCursor(
         last_id=str(uuid.uuid4()),
         last_value="a",
         direction="asc",

@@ -6,7 +6,7 @@ from codercore.lib.collection import Direction
 from fastapi import Depends, Request
 
 from coderfastapi.lib.decorators import paginate
-from coderfastapi.lib.validation.schemas.pagination import SerializableCursor
+from coderfastapi.lib.validation.schemas.pagination import DeserializableCursor
 from coderfastapi.lib.validation.schemas.query import (
     OrderableQueryParameters,
     QueryParameters,
@@ -99,7 +99,7 @@ async def test_paginate_not_injectable(mocker):
         {
             "next": {
                 "limit": limit,
-                "cursor": SerializableCursor(
+                "cursor": DeserializableCursor(
                     last_id=value[0].id,
                     last_value=value[0].id,
                     direction=Direction.ASC,
@@ -126,7 +126,7 @@ async def test_paginate_next_link(mocker):
         {
             "next": {
                 "limit": limit,
-                "cursor": SerializableCursor(
+                "cursor": DeserializableCursor(
                     last_id=value[0].id,
                     last_value=value[0].id,
                     direction=Direction.ASC,
@@ -158,7 +158,7 @@ async def test_paginate_orderable_next_link(mocker):
         {
             "next": {
                 "limit": limit,
-                "cursor": SerializableCursor(
+                "cursor": DeserializableCursor(
                     last_id=value[0].id,
                     last_value=value[0].value,
                     direction=Direction.ASC,
@@ -174,7 +174,7 @@ async def test_paginate_previous_link(mocker):
     request_mock = create_request_mock(
         mocker,
         QueryParameters(
-            cursor=SerializableCursor(
+            cursor=DeserializableCursor(
                 last_id=value[0].id,
                 last_value=value[0].id,
                 direction=Direction.ASC,
@@ -192,7 +192,7 @@ async def test_paginate_previous_link(mocker):
         {
             "previous": {
                 "limit": limit,
-                "cursor": SerializableCursor(
+                "cursor": DeserializableCursor(
                     last_id=value[1].id,
                     last_value=value[1].id,
                     direction=Direction.DESC,
@@ -208,7 +208,7 @@ async def test_paginate_full_links(mocker):
     request_mock = create_request_mock(
         mocker,
         QueryParameters(
-            cursor=SerializableCursor(
+            cursor=DeserializableCursor(
                 last_id=value[0].id,
                 last_value=value[0].id,
                 direction=Direction.ASC,
@@ -226,7 +226,7 @@ async def test_paginate_full_links(mocker):
         {
             "previous": {
                 "limit": limit,
-                "cursor": SerializableCursor(
+                "cursor": DeserializableCursor(
                     last_id=value[1].id,
                     last_value=value[1].id,
                     direction=Direction.DESC,
@@ -234,7 +234,7 @@ async def test_paginate_full_links(mocker):
             },
             "next": {
                 "limit": limit,
-                "cursor": SerializableCursor(
+                "cursor": DeserializableCursor(
                     last_id=value[-1].id,
                     last_value=value[-1].id,
                     direction=Direction.ASC,

@@ -1,14 +1,14 @@
 from codercore.lib.collection import Direction
 from pydantic import TypeAdapter
 
-from coderfastapi.lib.validation.schemas.pagination import SerializableCursor
+from coderfastapi.lib.validation.schemas.pagination import DeserializableCursor
 
 
-def test_serializable_cursor_init():
+def test_deserializable_cursor_init():
     last_id = "A"
     last_value = 1
     direction = Direction.ASC
-    cursor = SerializableCursor(
+    cursor = DeserializableCursor(
         last_id=last_id,
         last_value=last_value,
         direction=direction,
@@ -18,19 +18,19 @@ def test_serializable_cursor_init():
     assert cursor.direction == direction
 
 
-def test_serializable_cursor_serialize():
-    type_adapter = TypeAdapter(SerializableCursor)
-    cursor = SerializableCursor(last_id="A", last_value=1, direction="asc")
+def test_deserializable_cursor_deserialize():
+    type_adapter = TypeAdapter(DeserializableCursor)
+    cursor = DeserializableCursor(last_id="A", last_value=1, direction="asc")
     assert type_adapter.validate_python(cursor) == cursor
 
 
-def test_serializable_cursor_serialize_from_base64_str():
-    type_adapter = TypeAdapter(SerializableCursor)
-    cursor = SerializableCursor(last_id="A", last_value=1, direction="asc")
+def test_deserializable_cursor_deserialize_from_base64_str():
+    type_adapter = TypeAdapter(DeserializableCursor)
+    cursor = DeserializableCursor(last_id="A", last_value=1, direction="asc")
     assert type_adapter.validate_python(str(cursor)) == cursor
 
 
-def test_serializable_cursor_serialize_from_base64_bytes():
-    type_adapter = TypeAdapter(SerializableCursor)
-    cursor = SerializableCursor(last_id="A", last_value=1, direction="asc")
+def test_deserializable_cursor_deserialize_from_base64_bytes():
+    type_adapter = TypeAdapter(DeserializableCursor)
+    cursor = DeserializableCursor(last_id="A", last_value=1, direction="asc")
     assert type_adapter.validate_python(bytes(cursor)) == cursor
