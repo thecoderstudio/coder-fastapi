@@ -50,7 +50,7 @@ async def decorated_not_injectable(
 
 def create_request_mock(mocker, params: QueryParameters):
     request_mock = mocker.MagicMock()
-    request_mock.query_params = params.dict()
+    request_mock.query_params = params.model_dump()
     request_mock.url = httpx.URL(f"http://localhost?limit={params.limit}")
     if params.cursor:
         request_mock.url = httpx.URL(f"{request_mock.url}&cursor={params.cursor}")

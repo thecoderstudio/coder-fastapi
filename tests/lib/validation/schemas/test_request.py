@@ -49,7 +49,7 @@ def test_http_request_schema_from_request_minimal(mocker):
     )
 
     schema = HTTPRequestSchema.from_request(request)
-    assert schema.dict(by_alias=True, exclude_none=True) == {
+    assert schema.model_dump(by_alias=True, exclude_none=True) == {
         "requestMethod": request_method,
         "requestUrl": AnyHttpUrl(request_url),
         "requestSize": sys.getsizeof(request),
