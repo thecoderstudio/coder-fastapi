@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from codercore.lib.collection import Direction
 from pydantic import BaseModel, validator
 
@@ -10,7 +12,7 @@ ORDERABLE_PROPERTIES = (DEFAULT_ORDER_BY,)
 
 
 class QueryParameters(BaseModel):
-    _max_limit: int = MAX_LIMIT
+    _max_limit: ClassVar[int] = MAX_LIMIT
 
     cursor: CursorSchema | None = None
     limit: int = DEFAULT_LIMIT
