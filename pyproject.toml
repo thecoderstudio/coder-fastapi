@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "coderfastapi"
-version = "2.2.0"
+version = "2.4.5"
 description = "coderfastapi"
 readme = "README.md"
 authors = [{ name = "Code R", email = "hello@coderstudio.dev" }]
 dependencies = [
     'codercore ~= 3.0',
     'fastapi[all] ~= 0.89',
+    'google-cloud-logging ~= 3.7',
     'orjson ~= 3.8',
     'pydantic ~= 1.10',
     'python-jose ~= 3.3',
@@ -32,7 +33,7 @@ dev = [
 ]
 
 [tool.bumpver]
-current_version = "2.2.0"
+current_version = "2.4.5"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true
