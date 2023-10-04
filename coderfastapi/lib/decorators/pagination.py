@@ -7,7 +7,7 @@ from fastapi import Request, Response
 from fastapi.params import Depends
 
 from coderfastapi.lib.signature import copy_parameters
-from coderfastapi.lib.validation.schemas.pagination import CursorSchema
+from coderfastapi.lib.validation.schemas.pagination import DeserializableCursor
 from coderfastapi.lib.validation.schemas.query import (
     OrderableQueryParameters,
     QueryParameters,
@@ -107,20 +107,20 @@ def _create_cursor(
     id_attr: str,
     value_attr: str,
     item: T,
-) -> CursorSchema:
-    return CursorSchema(
+) -> DeserializableCursor:
+    return DeserializableCursor(
         last_id=getattr(item, id_attr),
         last_value=getattr(item, value_attr),
         direction=direction,
     )
 
 
-def _construct_link(cursor: CursorSchema, rel: str, request: Request) -> str:
+def _construct_link(cursor: DeserializableCursor, rel: str, request: Request) -> str:
     url = _construct_url_with_cursor(cursor, request)
     return f'<{url}>; rel="{rel}"'
 
 
-def _construct_url_with_cursor(cursor: CursorSchema, request: Request) -> str:
+def _construct_url_with_cursor(cursor: DeserializableCursor, request: Request) -> str:
     scheme, netloc, path, query_string, fragment = urlsplit(str(request.url))
     query_params = parse_qs(query_string)
     query_params["cursor"] = [str(cursor)]
