@@ -1,5 +1,4 @@
 import sys
-from ipaddress import IPv4Address, IPv6Address
 from typing import Self
 
 from pydantic import AnyHttpUrl, BaseModel, Field
@@ -10,7 +9,7 @@ class HTTPRequestSchema(BaseModel):
     request_method: str = Field(alias="requestMethod")
     request_url: AnyHttpUrl = Field(alias="requestUrl")
     request_size: int = Field(alias="requestSize")
-    remote_ip: IPv4Address | IPv6Address | None = Field(alias="remoteIp")
+    remote_ip: str | None = Field(alias="remoteIp")
     protocol: str
     referrer: str | None
     user_agent: str | None = Field(alias="userAgent")
