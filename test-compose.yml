@@ -10,7 +10,18 @@ services:
       - /home/coder/coder-fastapi/coderfastapi.egg-info
     networks:
       - test
+    env_file:
+      - cache.env.test
+    depends_on:
+      - cache-test
     tty: true
     stdin_open: true
+  cache-test:
+    container_name: coder-fastapi-cache-test
+    image: redis:7
+    networks:
+      - test
+    env_file:
+      - cache.env.test
 networks:
   test:
