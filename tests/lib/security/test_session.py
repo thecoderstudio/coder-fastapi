@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import pytest
 
-from coderfastapi.lib.security.session import SESSION_KEY_FORMAT
+from coderfastapi.lib.security.session.user import SESSION_KEY_FORMAT
 
 
 async def test_create_new_session(user_session_manager):
