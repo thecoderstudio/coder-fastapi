@@ -68,8 +68,10 @@ def _get_query_schema(func_signature: Signature, request: Request) -> tuple[str,
 
 
 def _is_valid_query_parameter(parameter: Parameter) -> bool:
-    return isclass(parameter.annotation) and issubclass(
-        parameter.annotation, QueryParameters
+    return (
+        isclass(parameter.annotation)
+        and getattr(parameter.annotation, "__canonical_name__", None)
+        == "QueryParameters"
     )
 
 

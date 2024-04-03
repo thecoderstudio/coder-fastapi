@@ -12,6 +12,7 @@ ORDERABLE_PROPERTIES = (DEFAULT_ORDER_BY,)
 
 
 class QueryParameters(BaseModel):
+    __canonical_name__ = "QueryParameters"
     _max_limit: ClassVar[int] = MAX_LIMIT
 
     cursor: DeserializableCursor | None = None
