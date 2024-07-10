@@ -93,13 +93,18 @@ def _build_links(
     if isinstance(query_schema, OrderableQueryParameters):
         value_attr = query_schema.order_by
 
-    if query_schema.cursor and result_length >= 1:
-        cursor = _create_cursor(Direction.DESC, id_attr, value_attr, result[0])
-        links.append(_construct_link(cursor, "previous", request))
-
-    if result_length == query_schema.limit:
-        cursor = _create_cursor(Direction.ASC, id_attr, value_attr, result[-1])
-        links.append(_construct_link(cursor, "next", request))
+    if previous_cursor := query_schema.cursor:
+        previous_direction = previous_cursor.direction
+        if previous_direction == Direction.ASC or result_length == query_schema.limit:
+            cursor = _create_cursor(Direction.DESC, id_attr, value_attr, result[0])
+            links.append(_construct_link(cursor, "previous", request))
+        if previous_direction == Direction.DESC or result_length == query_schema.limit:
+            cursor = _create_cursor(Direction.ASC, id_attr, value_attr, result[-1])
+            links.append(_construct_link(cursor, "next", request))
+    else:
+        if result_length == query_schema.limit:
+            cursor = _create_cursor(Direction.ASC, id_attr, value_attr, result[-1])
+            links.append(_construct_link(cursor, "next", request))
 
     return links
 

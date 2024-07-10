@@ -168,7 +168,41 @@ async def test_paginate_orderable_next_link(mocker):
     )
 
 
-async def test_paginate_previous_link(mocker):
+async def test_paginate_with_previous_cursor_next_link(mocker):
+    limit = 2
+    value = [Entity(id=1, value="a"), Entity(id=2, value="b")]
+    request_mock = create_request_mock(
+        mocker,
+        QueryParameters(
+            cursor=DeserializableCursor(
+                last_id=value[1].id,
+                last_value=value[1].id,
+                direction=Direction.DESC,
+            ),
+            limit=limit,
+        ),
+    )
+    response_mock = create_response_mock(mocker, request_mock)
+
+    result = await decorated(request_mock, response_mock, value=value[:1])
+
+    assert result == value[:1]
+    assert_link_header(
+        response_mock,
+        {
+            "next": {
+                "limit": limit,
+                "cursor": DeserializableCursor(
+                    last_id=value[0].id,
+                    last_value=value[0].id,
+                    direction=Direction.ASC,
+                ),
+            }
+        },
+    )
+
+
+async def test_paginate_with_previous_cursor_previous_link(mocker):
     limit = 2
     value = [Entity(id=1, value="a"), Entity(id=2, value="b")]
     request_mock = create_request_mock(
@@ -202,7 +236,8 @@ async def test_paginate_previous_link(mocker):
     )
 
 
-async def test_paginate_full_links(mocker):
+@pytest.mark.parametrize("direction", ("asc", "desc"))
+async def test_paginate_with_previous_cursor_full_links(mocker, direction):
     limit = 1
     value = [Entity(id=1, value="a"), Entity(id=2, value="b")]
     request_mock = create_request_mock(
@@ -211,7 +246,7 @@ async def test_paginate_full_links(mocker):
             cursor=DeserializableCursor(
                 last_id=value[0].id,
                 last_value=value[0].id,
-                direction=Direction.ASC,
+                direction=direction,
             ),
             limit=limit,
         ),
