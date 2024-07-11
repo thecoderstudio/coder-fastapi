@@ -89,9 +89,7 @@ def _build_links(
 ) -> list[str]:
     result_length = len(result)
     links = []
-    value_attr = id_attr
-    if isinstance(query_schema, OrderableQueryParameters):
-        value_attr = query_schema.order_by
+    value_attr = getattr(query_schema, "order_by", id_attr)
 
     if previous_cursor := query_schema.cursor:
         previous_direction = previous_cursor.direction
