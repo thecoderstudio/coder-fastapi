@@ -23,7 +23,7 @@ jobs:
         uses: psf/black@stable
 
       - name: Test with pytest
-        run: docker-compose -f test-compose.yml up --exit-code-from coder-fastapi-test coder-fastapi-test
+        run: docker compose -f test-compose.yml up --exit-code-from coder-fastapi-test coder-fastapi-test
 
   build_and_release:
     needs: test
