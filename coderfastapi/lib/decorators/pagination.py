@@ -8,10 +8,7 @@ from fastapi.params import Depends
 
 from coderfastapi.lib.signature import copy_parameters
 from coderfastapi.lib.validation.schemas.pagination import DeserializableCursor
-from coderfastapi.lib.validation.schemas.query import (
-    OrderableQueryParameters,
-    QueryParameters,
-)
+from coderfastapi.lib.validation.schemas.query import QueryParameters
 
 T = TypeVar("T")
 S = TypeVar("S", bound=QueryParameters)

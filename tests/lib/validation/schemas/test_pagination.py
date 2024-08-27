@@ -3,6 +3,7 @@ import uuid
 from base64 import urlsafe_b64encode
 from dataclasses import asdict
 
+import pytest
 from codercore.lib.collection import Direction
 from fastapi.encoders import jsonable_encoder
 from pydantic import TypeAdapter
@@ -32,6 +33,18 @@ def test_deserializable_cursor_encode():
     assert cursor.encode() == expected_bytes
 
 
+def test_deserializable_cursor_with_tuple_properties_encode():
+    cursor = DeserializableCursor(
+        last_id=(uuid.uuid4(), uuid.uuid4()),
+        last_value=(1, 2),
+        direction="asc",
+    )
+    expected_bytes = urlsafe_b64encode(
+        json.dumps(jsonable_encoder(asdict(cursor))).encode()
+    )
+    assert cursor.encode() == expected_bytes
+
+
 def test_deserializable_cursor_decode():
     cursor = DeserializableCursor(last_id=uuid.uuid4(), last_value=1, direction="asc")
     assert cursor.decode(cursor.encode()) == DeserializableCursor(
@@ -41,19 +54,50 @@ def test_deserializable_cursor_decode():
     )
 
 
-def test_deserializable_cursor_deserialize():
+def test_deserializable_cursor_with_tuple_properties_decode():
+    cursor = DeserializableCursor(
+        last_id=(uuid.uuid4(), uuid.uuid4()),
+        last_value=(1, 2),
+        direction="asc",
+    )
+    assert cursor.decode(cursor.encode()) == DeserializableCursor(
+        last_id=[str(id_) for id_ in cursor.last_id],
+        last_value=list(cursor.last_value),
+        direction=cursor.direction,
+    )
+
+
+@pytest.mark.parametrize(
+    "cursor",
+    (
+        DeserializableCursor(last_id="A", last_value=1, direction="asc"),
+        DeserializableCursor(last_id=["A", "B"], last_value=[1, 2], direction="asc"),
+    ),
+)
+def test_deserializable_cursor_deserialize(cursor):
     type_adapter = TypeAdapter(DeserializableCursor)
-    cursor = DeserializableCursor(last_id="A", last_value=1, direction="asc")
     assert type_adapter.validate_python(cursor) == cursor
 
 
-def test_deserializable_cursor_deserialize_from_base64_str():
+@pytest.mark.parametrize(
+    "cursor",
+    (
+        DeserializableCursor(last_id="A", last_value=1, direction="asc"),
+        DeserializableCursor(last_id=["A", "B"], last_value=[1, 2], direction="asc"),
+    ),
+)
+def test_deserializable_cursor_deserialize_from_base64_str(cursor):
     type_adapter = TypeAdapter(DeserializableCursor)
-    cursor = DeserializableCursor(last_id="A", last_value=1, direction="asc")
     assert type_adapter.validate_python(str(cursor)) == cursor
 
 
-def test_deserializable_cursor_deserialize_from_base64_bytes():
+@pytest.mark.parametrize(
+    "cursor",
+    (
+        DeserializableCursor(last_id="A", last_value=1, direction="asc"),
+        DeserializableCursor(last_id=["A", "B"], last_value=[1, 2], direction="asc"),
+    ),
+)
+def test_deserializable_cursor_deserialize_from_base64_bytes(cursor):
     type_adapter = TypeAdapter(DeserializableCursor)
-    cursor = DeserializableCursor(last_id="A", last_value=1, direction="asc")
     assert type_adapter.validate_python(bytes(cursor)) == cursor
