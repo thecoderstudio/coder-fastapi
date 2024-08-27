@@ -24,11 +24,26 @@ class Entity:
     value: str
 
 
+@dataclass
+class MultiIDEntity:
+    id_a: str
+    id_b: int
+    value: str
+
+
 @paginate("id")
 async def decorated(
     value: list[Entity],
     params: QueryParameters = Depends(),
 ) -> list[Entity]:
+    return value
+
+
+@paginate("id_a", "id_b")
+async def decorated_multi_id(
+    value: list[MultiIDEntity],
+    params: QueryParameters = Depends(),
+) -> list[MultiIDEntity]:
     return value
 
 
@@ -129,6 +144,33 @@ async def test_paginate_next_link(mocker):
                 "cursor": DeserializableCursor(
                     last_id=value[0].id,
                     last_value=value[0].id,
+                    direction=Direction.ASC,
+                ),
+            }
+        },
+    )
+
+
+async def test_paginate_multi_id_next_link(mocker):
+    limit = 1
+    request_mock = create_request_mock(
+        mocker,
+        QueryParameters(cursor=None, limit=limit),
+    )
+    response_mock = create_response_mock(mocker, request_mock)
+    value = [MultiIDEntity(id_a="b", id_b=1, value="a")]
+
+    result = await decorated_multi_id(request_mock, response_mock, value=value)
+
+    assert result == value
+    assert_link_header(
+        response_mock,
+        {
+            "next": {
+                "limit": limit,
+                "cursor": DeserializableCursor(
+                    last_id=[value[0].id_a, value[0].id_b],
+                    last_value=[value[0].id_a, value[0].id_b],
                     direction=Direction.ASC,
                 ),
             }

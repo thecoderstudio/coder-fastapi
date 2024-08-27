@@ -1,8 +1,9 @@
 from inspect import Parameter, Signature, isclass, signature
-from typing import Awaitable, Callable, Iterable, TypeVar
+from typing import Any, Awaitable, Callable, Iterable, TypeVar
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from codercore.lib.collection import Direction
+from codercore.types import SequentialCollection
 from fastapi import Request, Response
 from fastapi.params import Depends
 
@@ -16,7 +17,7 @@ Entities = Iterable[T]
 
 
 def paginate(
-    id_attr: str,
+    *id_attr: str,
 ) -> Callable[
     [Callable[..., Awaitable[Entities]]],
     Callable[[Request, Response, ...], Awaitable[Entities]],
@@ -79,7 +80,7 @@ def _is_injectable(parameter) -> bool:
 
 
 def _build_links(
-    id_attr: str,
+    id_attr: SequentialCollection[str],
     query_schema: S,
     request: Request,
     result: Entities,
@@ -106,15 +107,32 @@ def _build_links(
 
 def _create_cursor(
     direction: Direction,
-    id_attr: str,
-    value_attr: str,
+    id_attr: SequentialCollection[str],
+    value_attr: str | SequentialCollection[str],
     item: T,
 ) -> DeserializableCursor:
     return DeserializableCursor(
-        last_id=getattr(item, id_attr),
-        last_value=getattr(item, value_attr),
+        last_id=_get_last_id(item, id_attr),
+        last_value=_get_last_value(item, value_attr),
         direction=direction,
     )
+
+
+def _get_last_id(item: T, id_attr: SequentialCollection[str]) -> Any:
+    if len(id_attr) > 1:
+        return [getattr(item, attr) for attr in id_attr]
+    else:
+        return getattr(item, id_attr[0])
+
+
+def _get_last_value(item: T, value_attr: str | SequentialCollection[str]) -> Any:
+    if isinstance(value_attr, (list, tuple)):
+        if len(value_attr) > 1:
+            return [getattr(item, attr) for attr in value_attr]
+        else:
+            return getattr(item, value_attr[0])
+    else:
+        return getattr(item, value_attr)
 
 
 def _construct_link(cursor: DeserializableCursor, rel: str, request: Request) -> str:
