@@ -1,4 +1,4 @@
-from typing import ClassVar
+from typing import ClassVar, TypeVar
 
 from codercore.lib.collection import Direction
 from pydantic import BaseModel, field_validator
@@ -9,6 +9,8 @@ MAX_LIMIT = 100
 DEFAULT_LIMIT = 25
 DEFAULT_ORDER_BY = "id"
 ORDERABLE_PROPERTIES = (DEFAULT_ORDER_BY,)
+
+T = TypeVar("T", str, tuple[str, ...])
 
 
 class QueryParameters(BaseModel):
@@ -29,12 +31,17 @@ class QueryParameters(BaseModel):
 class OrderableQueryParameters(QueryParameters):
     _orderable_properties: ClassVar[tuple[str]] = ORDERABLE_PROPERTIES
 
-    order_by: str = DEFAULT_ORDER_BY
+    order_by: str | tuple[str, ...] = DEFAULT_ORDER_BY
     order_direction: Direction = Direction.DESC
 
     @field_validator("order_by")
     @classmethod
-    def validate_order_by(cls, v: str) -> str:
-        if v in cls._orderable_properties:
-            return v
-        raise ValueError(f"order_by must be one of {cls._orderable_properties}")
+    def validate_order_by(cls, v: T) -> T:
+        if isinstance(v, str):
+            order_by_values = (v,)
+        else:
+            order_by_values = v
+        for value in order_by_values:
+            if value not in cls._orderable_properties:
+                raise ValueError(f"order_by must be one of {cls._orderable_properties}")
+        return v

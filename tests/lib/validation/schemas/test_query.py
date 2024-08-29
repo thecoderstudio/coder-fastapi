@@ -55,6 +55,14 @@ def test_orderable_query_parameters_load():
     assert schema.order_by == "id"
 
 
+def test_orderable_query_parameters_load_order_by_multiple():
+    class ModifiedQueryParams(OrderableQueryParameters):
+        _orderable_properties = ("id", "foo", "bar")
+
+    schema = ModifiedQueryParams(order_by=["bar", "foo"])
+    assert schema.order_by == ("bar", "foo")
+
+
 def test_orderable_query_parameters_load_defaults():
     schema = OrderableQueryParameters()
     assert schema.cursor is None
