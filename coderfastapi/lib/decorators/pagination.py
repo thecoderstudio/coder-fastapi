@@ -98,7 +98,7 @@ def _build_links(
             cursor = _create_cursor(Direction.ASC, id_attr, value_attr, result[-1])
             links.append(_construct_link(cursor, "next", request))
     else:
-        if result_length == query_schema.limit:
+        if result_length >= query_schema.limit:
             cursor = _create_cursor(Direction.ASC, id_attr, value_attr, result[-1])
             links.append(_construct_link(cursor, "next", request))
 
