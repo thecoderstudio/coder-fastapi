@@ -7,6 +7,7 @@ from codercore.types import SequentialCollection
 from fastapi import Request, Response
 from fastapi.params import Depends
 
+from coderfastapi.lib.decorators.util import propagate_params
 from coderfastapi.lib.signature import copy_parameters
 from coderfastapi.lib.validation.schemas.pagination import DeserializableCursor
 from coderfastapi.lib.validation.schemas.query import QueryParameters
@@ -39,6 +40,7 @@ def paginate(
             else:
                 query_schema = kwargs[schema_name]
 
+            kwargs = propagate_params(func, kwargs, request=request, response=response)
             result = await func(*args, **kwargs)
             links = _build_links(id_attr, query_schema, request, result)
 

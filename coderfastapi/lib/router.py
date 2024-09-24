@@ -1,9 +1,9 @@
-import copy
 import inspect
 from typing import Any, Awaitable, Callable, ParamSpec, TypeVar
 
 from fastapi import APIRouter, Request
 
+from coderfastapi.lib.decorators.util import propagate_params
 from coderfastapi.lib.security.acl import ACLProvider
 from coderfastapi.lib.security.policies.authentication import AuthenticationPolicy
 from coderfastapi.lib.security.policies.authorization import AuthorizationPolicy
@@ -48,7 +48,12 @@ class SecureRouter(APIRouter):
             context_acl_provider,
         )
 
-        kwargs = self._propagate_params(handler, kwargs, authenticated_request, context)
+        kwargs = propagate_params(
+            handler,
+            kwargs,
+            request=authenticated_request,
+            context=context,
+        )
         output = handler(*args, **kwargs)
         if inspect.iscoroutine(output):
             output = await output
@@ -69,21 +74,6 @@ class SecureRouter(APIRouter):
             authenticated_request,
             context_acl_provider,
         )
-
-    @staticmethod
-    def _propagate_params(
-        func: Callable[P, Awaitable[T] | T],
-        kwargs: [str, Any],
-        request: Request,
-        context: Any | None,
-    ) -> dict[str, Any]:
-        new_kwargs = copy.copy(kwargs)
-        func_signature = inspect.signature(func)
-        if func_signature.parameters.get("context"):
-            new_kwargs["context"] = context
-        if func_signature.parameters.get("request"):
-            new_kwargs["request"] = request
-        return new_kwargs
 
     def post(self, *outer_args, **outer_kwargs):
         return lambda func: self._http_method(func, "post", *outer_args, **outer_kwargs)
