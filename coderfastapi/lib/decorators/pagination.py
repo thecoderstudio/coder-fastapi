@@ -89,6 +89,9 @@ def _build_links(
 ) -> list[str]:
     result_length = len(result)
     links = []
+    if result_length == 0:
+        return links
+
     value_attr = getattr(query_schema, "order_by", id_attr)
 
     if previous_cursor := query_schema.cursor:
