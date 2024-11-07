@@ -36,6 +36,22 @@ def test_dated_aggregation_parameters_mixin_schema_complete(date_precision):
     assert params.date_precision == date_precision
 
 
+@pytest.mark.parametrize("date_precision", tuple(DatePrecision))
+def test_dated_aggregation_parameters_mixin_schema_complete_through_dict(
+    date_precision,
+):
+    min_date = datetime.now(UTC)
+    max_date = datetime.now(UTC)
+    data = {
+        "min_date": min_date,
+        "max_date": max_date,
+        "date_precision": date_precision,
+    }
+
+    result_data = DatedAggregationParametersMixinSchema.validate(data)
+    assert result_data == data
+
+
 def test_dated_aggregation_parameters_mixin_schema_max_date_preceeds_min_date():
     max_date = datetime.now(UTC)
     min_date = datetime.now(UTC)

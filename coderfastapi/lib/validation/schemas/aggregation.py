@@ -16,8 +16,11 @@ class AggregationParametersSchema(AggregationParameters):
 class DatedAggregationParametersMixinSchema(DatedAggregationParametersMixin):
     @model_validator(mode="before")
     @classmethod
-    def validate(cls, values: ArgsKwargs) -> ArgsKwargs:
-        kwargs = values.kwargs if values.kwargs else {}
+    def validate(cls, values: ArgsKwargs | dict) -> ArgsKwargs | dict:
+        if isinstance(values, dict):
+            kwargs = values
+        else:
+            kwargs = values.kwargs if values.kwargs else {}
         max_date = kwargs.get("max_date")
         min_date = kwargs.get("min_date")
         if max_date and min_date and max_date < min_date:
