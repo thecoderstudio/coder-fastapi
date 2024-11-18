@@ -20,7 +20,7 @@ class DatedAggregationParametersMixinSchema(DatedAggregationParametersMixin):
         if isinstance(values, dict):
             kwargs = values
         else:
-            kwargs = getattr(values, "kwargs")
+            kwargs = getattr(values, "kwargs", None)
             kwargs = {} if kwargs is None else kwargs
         max_date = kwargs.get("max_date")
         min_date = kwargs.get("min_date")
