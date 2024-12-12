@@ -33,7 +33,9 @@ async def test_validate_permission_denied_explicit_with_context_provider(
         )
 
 
-async def test_validate_permission_denied_implicit(mock_policy, request_with_session_mock):
+async def test_validate_permission_denied_implicit(
+    mock_policy, request_with_session_mock
+):
     policy = mock_policy(((Allow, Everyone, "fake"), (Allow, "test", "public")))
     with raises_http_forbidden():
         await policy.validate_permission("public", request_with_session_mock)
@@ -71,7 +73,9 @@ async def test_check_permission_denied_implicit(mock_policy, request_with_sessio
     assert allowed is False
 
 
-async def test_check_permission_invalid_acl(mocker, mock_policy, request_with_session_mock):
+async def test_check_permission_invalid_acl(
+    mocker, mock_policy, request_with_session_mock
+):
     policy = mock_policy((("fake", Everyone, "public"),))
 
     with pytest.raises(ValueError, match="Invalid action in ACL"):
