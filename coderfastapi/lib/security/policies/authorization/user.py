@@ -10,8 +10,9 @@ log = logging.getLogger(__name__)
 
 class UserAuthorizationPolicy(AuthorizationPolicy):
     @classmethod
-    def get_principals(cls, request: Request) -> tuple[str, ...]:
-        principals = super().get_principals(request)
+    async def get_principals(cls, request: Request) -> tuple[str, ...]:
+        print("*****" * 10)
+        principals = await super().get_principals(request)
 
         authenticated_user_id = request.user_id
         if authenticated_user_id:
@@ -34,11 +35,11 @@ class UserAuthorizationPolicy(AuthorizationPolicy):
 
 class RecoverableUserAuthorizationPolicy(UserAuthorizationPolicy):
     @classmethod
-    def get_principals(cls, request: Request) -> tuple[str, ...]:
+    async def get_principals(cls, request: Request) -> tuple[str, ...]:
         if not request.recovery:
-            return super().get_principals(request)
+            return await super().get_principals(request)
 
-        principals = AuthorizationPolicy.get_principals(request) + (
+        principals = await AuthorizationPolicy.get_principals(request) + (
             f"recovering_user:{request.user_id}",
         )
         log.debug(f"Found principals: {principals}")

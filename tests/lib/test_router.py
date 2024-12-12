@@ -98,7 +98,7 @@ async def call_http_method_decorated_mock(
     async def async_endpoint_mock():
         pass
 
-    await endpoint_mock(request=request_mock)
+    endpoint_mock(request=request_mock)
     await async_endpoint_mock(request=request_mock)
 
 

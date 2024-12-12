@@ -17,14 +17,14 @@ class AuthorizationPolicy:
     def __init__(self, acl_provider: ACLProvider) -> None:
         self.acl_provider = acl_provider
 
-    def validate_permission(
+    async def validate_permission(
         self,
         requested_permission: str,
         http_connection: HTTPConnection,
         context_acl_provider: Optional[ACLProvider] = None,
     ) -> None:
         try:
-            allowed = self.check_permission(
+            allowed = await self.check_permission(
                 requested_permission, http_connection, context_acl_provider
             )
         except ValueError as e:
@@ -39,13 +39,13 @@ class AuthorizationPolicy:
             detail="Permission denied.",
         )
 
-    def check_permission(
+    async def check_permission(
         self,
         requested_permission: str,
         http_connection: HTTPConnection,
         context_acl_provider: Optional[ACLProvider] = None,
     ) -> bool:
-        principals = self.get_principals(http_connection)
+        principals = await self.get_principals(http_connection)
 
         for action, principal, permission in self.get_complete_acl(
             context_acl_provider
@@ -65,7 +65,7 @@ class AuthorizationPolicy:
         return False
 
     @classmethod
-    def get_principals(cls, http_connection: HTTPConnection) -> tuple[str, ...]:
+    async def get_principals(cls, http_connection: HTTPConnection) -> tuple[str, ...]:
         return (Everyone,)
 
     def get_complete_acl(

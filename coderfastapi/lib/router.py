@@ -69,7 +69,7 @@ class SecureRouter(APIRouter):
         authenticated_request: Request,
         context_acl_provider: ACLProvider | None = None,
     ) -> None:
-        self.authorization_policy.validate_permission(
+        await self.authorization_policy.validate_permission(
             permission,
             authenticated_request,
             context_acl_provider,
