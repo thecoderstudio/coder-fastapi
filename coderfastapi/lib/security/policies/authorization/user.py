@@ -11,7 +11,6 @@ log = logging.getLogger(__name__)
 class UserAuthorizationPolicy(AuthorizationPolicy):
     @classmethod
     async def get_principals(cls, request: Request) -> tuple[str, ...]:
-        print("*****" * 10)
         principals = await super().get_principals(request)
 
         authenticated_user_id = request.user_id
