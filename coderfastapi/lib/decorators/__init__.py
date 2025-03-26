@@ -13,7 +13,7 @@ def http_require(
     entity_name: str, boolean: bool = False
 ) -> Callable[[Callable[..., Awaitable[Optional[T]]]], Callable[..., Awaitable[T]]]:
     def decorate(
-        func: Callable[..., Awaitable[Optional[T]]]
+        func: Callable[..., Awaitable[Optional[T]]],
     ) -> Callable[..., Awaitable[T]]:
         @wraps(func)
         async def wrapper(*args, **kwargs) -> T:

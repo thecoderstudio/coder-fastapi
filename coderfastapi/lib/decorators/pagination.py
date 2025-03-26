@@ -24,7 +24,7 @@ def paginate(
     Callable[[Request, Response, ...], Awaitable[Entities]],
 ]:
     def decorate(
-        func: Callable[..., Awaitable[Entities]]
+        func: Callable[..., Awaitable[Entities]],
     ) -> Callable[[Request, Response, ...], Awaitable[Entities]]:
         func_signature = signature(func)
 

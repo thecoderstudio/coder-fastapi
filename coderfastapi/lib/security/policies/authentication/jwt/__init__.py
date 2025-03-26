@@ -54,7 +54,7 @@ class JWTAuthenticationPolicy(AuthenticationPolicy):
 
     @staticmethod
     def _get_auth_method_and_token(
-        headers: dict[str, Any]
+        headers: dict[str, Any],
     ) -> tuple[str, str] | tuple[None, None]:
         try:
             return get_auth_method_and_token(headers["authorization"])
