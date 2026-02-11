@@ -1,5 +1,6 @@
 import inspect
-from typing import Any, Awaitable, Callable, ParamSpec, TypeVar
+from collections.abc import Awaitable
+from typing import Any, Callable, TypeVar
 
 from fastapi import APIRouter, Request
 
@@ -10,10 +11,11 @@ from coderfastapi.lib.security.policies.authorization import AuthorizationPolicy
 from coderfastapi.lib.signature import copy_parameters
 
 T = TypeVar("T")
-P = ParamSpec("P")
 
 
 class SecureRouter(APIRouter):
+    """APIRouter with authentication and ACL-based authorization."""
+
     authentication_policy: AuthenticationPolicy
     authorization_policy: AuthorizationPolicy
 
@@ -30,12 +32,12 @@ class SecureRouter(APIRouter):
 
     async def _call_handler_with_authentication(
         self,
-        handler: Callable[P, Awaitable[T] | T],
+        handler: Callable[..., Awaitable[T] | T],
         permission: str,
         request: Request,
         context: Any | None,
-        *args: P.args,
-        **kwargs: P.kwargs,
+        *args,
+        **kwargs,
     ) -> T:
         context_acl_provider = None
         if isinstance(context, ACLProvider):
@@ -55,9 +57,8 @@ class SecureRouter(APIRouter):
             context=context,
         )
         output = handler(*args, **kwargs)
-        if inspect.iscoroutine(output):
-            output = await output
-
+        if isinstance(output, Awaitable):
+            return await output
         return output
 
     async def _authenticate_request(self, request: Request) -> Request:
@@ -109,12 +110,12 @@ class SecureRouter(APIRouter):
 
     def _http_method(
         self,
-        func: Callable[P, Awaitable[T] | T],
+        func: Callable[..., Awaitable[T] | T],
         http_method: str,
         *outer_args,
         permission: str = "public",
         **outer_kwargs,
-    ) -> Callable[[Request, P], Awaitable[T]]:
+    ) -> Callable[..., Awaitable[T]]:
         route = getattr(super(SecureRouter, self), http_method)
 
         @route(*outer_args, **outer_kwargs)

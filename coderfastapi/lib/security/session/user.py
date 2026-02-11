@@ -9,11 +9,17 @@ SESSION_KEY_FORMAT = "user_session:{session_id}"
 
 @dataclass
 class UserSession(Session):
+    """Session bound to a specific user by UUID."""
+
     user_id: UUID
 
 
 class UserSessionManager(SessionManager):
-    async def create_session(self, user_id: UUID) -> UserSession:
+    """Session manager that maps session IDs to user UUIDs in Redis."""
+
+    async def create_session(  # ty: ignore[invalid-method-override]
+        self, user_id: UUID
+    ) -> UserSession:
         session = await self._create_session(str(user_id))
         return UserSession(
             id=session.id,
@@ -21,7 +27,9 @@ class UserSessionManager(SessionManager):
             remaining_ttl=session.remaining_ttl,
         )
 
-    async def get_session_by_id(self, session_id: str) -> UserSession | None:
+    async def get_session_by_id(
+        self, session_id: str
+    ) -> UserSession | None:  # ty: ignore[invalid-method-override]
         if (user_id := await self._get_user_id_for_session(session_id)) and (
             ttl := await self._get_remaining_ttl_for_session(session_id)
         ):

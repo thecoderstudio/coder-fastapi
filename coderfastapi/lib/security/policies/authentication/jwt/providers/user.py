@@ -11,13 +11,16 @@ log = logging.getLogger(__name__)
 
 
 class UserDataProvider(JWTDataProvider):
+    """JWT provider that extracts and encodes user identity from tokens."""
+
     def augment_request(self, request: T, data: dict[str, Any]) -> T:
         request_ = super().augment_request(request, data)
         try:
-            request_.user_id = UUID(data["user_id"])
-            log.info(f"Authenticated user: {request_.user_id}")
+            user_id = UUID(data["user_id"])
+            request_.user_id = user_id  # ty: ignore[unresolved-attribute]
+            log.info(f"Authenticated user: {user_id}")
         except (KeyError, ValueError):
-            request_.user_id = None
+            request_.user_id = None  # ty: ignore[unresolved-attribute]
 
         return request_
 

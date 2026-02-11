@@ -1,6 +1,5 @@
 import logging
 from http import HTTPStatus
-from typing import Optional
 
 from fastapi import HTTPException
 from fastapi.requests import HTTPConnection
@@ -12,6 +11,8 @@ log = logging.getLogger(__name__)
 
 
 class AuthorizationPolicy:
+    """ACL-based authorization that checks principals against rules."""
+
     acl_provider: ACLProvider
 
     def __init__(self, acl_provider: ACLProvider) -> None:
@@ -21,7 +22,7 @@ class AuthorizationPolicy:
         self,
         requested_permission: str,
         http_connection: HTTPConnection,
-        context_acl_provider: Optional[ACLProvider] = None,
+        context_acl_provider: ACLProvider | None = None,
     ) -> None:
         try:
             allowed = self.check_permission(
@@ -43,7 +44,7 @@ class AuthorizationPolicy:
         self,
         requested_permission: str,
         http_connection: HTTPConnection,
-        context_acl_provider: Optional[ACLProvider] = None,
+        context_acl_provider: ACLProvider | None = None,
     ) -> bool:
         principals = self.get_principals(http_connection)
 
@@ -70,7 +71,7 @@ class AuthorizationPolicy:
 
     def get_complete_acl(
         self,
-        context_acl_provider: Optional[ACLProvider] = None,
+        context_acl_provider: ACLProvider | None = None,
     ) -> ACL:
         acl = self.acl_provider.__acl__()
         if not context_acl_provider:

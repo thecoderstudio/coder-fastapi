@@ -1,6 +1,7 @@
 import copy
 import logging
 from collections import OrderedDict
+from collections.abc import Mapping
 from typing import Any, TypeVar
 
 from fastapi import Request
@@ -30,6 +31,11 @@ DEFAULT_PROVIDERS: set[JWTDataProvider] = {
 
 
 class JWTAuthenticationPolicy(AuthenticationPolicy):
+    """Authentication policy that validates Bearer JWT tokens.
+
+    Augments requests with data from registered providers.
+    """
+
     secret_key: str
     algorithm: str
     providers: set[JWTDataProvider]
@@ -54,7 +60,7 @@ class JWTAuthenticationPolicy(AuthenticationPolicy):
 
     @staticmethod
     def _get_auth_method_and_token(
-        headers: dict[str, Any]
+        headers: Mapping[str, Any],
     ) -> tuple[str, str] | tuple[None, None]:
         try:
             return get_auth_method_and_token(headers["authorization"])
@@ -79,6 +85,7 @@ class JWTAuthenticationPolicy(AuthenticationPolicy):
             return {}
 
     def create_access_token(self, **kwargs) -> str:
+        """Create a signed JWT from data provided by all registered providers."""
         data = {}
         for provider in self.providers:
             try:
@@ -94,6 +101,10 @@ class JWTAuthenticationPolicy(AuthenticationPolicy):
 def get_auth_method_and_token(
     authorization_header: str,
 ) -> tuple[str, str] | tuple[None, None]:
+    """Parse an Authorization header into (method, token).
+
+    Returns (None, None) on failure.
+    """
     try:
         auth_method, token_string = authorization_header.split(" ")
         return auth_method, token_string

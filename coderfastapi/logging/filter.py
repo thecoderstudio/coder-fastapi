@@ -10,6 +10,8 @@ from coderfastapi.logging.context import CloudTraceContext
 
 
 class CloudLoggingFilter(GoogleCloudLoggingFilter):
+    """Attaches Cloud Trace and HTTP request context to log records."""
+
     cloud_trace_context: CloudTraceContext
     http_request_context: ContextVar
 
@@ -26,7 +28,7 @@ class CloudLoggingFilter(GoogleCloudLoggingFilter):
 
     def filter(self, record: logging.LogRecord) -> bool:
         trace_id, span_id = self.cloud_trace_context.get()
-        if trace_id:
+        if trace_id and span_id:
             record = self._add_trace_data(record, trace_id, span_id)
 
         if http_request := self.http_request_context.get():

@@ -9,6 +9,8 @@ DEFAULT_ACL: ACL = ((Allow, Everyone, "public"),)
 
 
 class ACLProvider:
+    """Provides an Access Control List of (action, principal, permission) tuples."""
+
     acl: ACL = ()
 
     def __init__(self, acl: ACL = ()) -> None:

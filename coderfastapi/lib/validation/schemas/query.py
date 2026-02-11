@@ -14,6 +14,8 @@ T = TypeVar("T", str, tuple[str, ...])
 
 
 class QueryParameters(BaseModel):
+    """Base query parameters with cursor-based pagination and limit validation."""
+
     __canonical_name__ = "QueryParameters"
     _max_limit: ClassVar[int] = MAX_LIMIT
 
@@ -29,6 +31,8 @@ class QueryParameters(BaseModel):
 
 
 class OrderableQueryParameters(QueryParameters):
+    """Query parameters extended with configurable order_by and direction fields."""
+
     _orderable_properties: ClassVar[tuple[str]] = ORDERABLE_PROPERTIES
 
     order_by: str | tuple[str, ...] = DEFAULT_ORDER_BY

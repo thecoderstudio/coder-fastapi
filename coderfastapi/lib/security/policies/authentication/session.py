@@ -3,7 +3,7 @@ from typing import TypeVar
 
 from fastapi import Request
 
-from coderfastapi.lib.security import UserSessionManager
+from coderfastapi.lib.security import UserSession, UserSessionManager
 from coderfastapi.lib.security.policies.authentication import AuthenticationPolicy
 
 SESSION_COOKIE_KEY = "session_id"
@@ -11,22 +11,33 @@ T = TypeVar("T", bound=Request)
 
 
 class UserSessionAuthenticationPolicy(AuthenticationPolicy):
+    """Authentication policy that identifies users via session cookies.
+
+    Sessions are stored in Redis.
+    """
+
     @classmethod
-    async def authenticate_request(
+    async def authenticate_request(  # ty: ignore[invalid-method-override]
         cls,
         request: T,
         session_manager: UserSessionManager,
     ) -> T:
         request_ = copy.copy(request)
-        request_.user_id = None
+        request_.user_id = None  # ty: ignore[unresolved-attribute]
         session_id = cls._get_session_id_from_cookie(request.cookies)
 
         if not session_id:
             return request_
         if session := await session_manager.get_session_by_id(session_id):
-            request_.user_id = session.user_id
+            request_ = cls._authenticate_from_user_session(request_, session)
         return request_
 
     @staticmethod
     def _get_session_id_from_cookie(cookies: dict) -> str | None:
         return cookies.get(SESSION_COOKIE_KEY)
+
+    @staticmethod
+    def _authenticate_from_user_session(request: T, session: UserSession) -> T:
+        request_ = copy.copy(request)
+        request_.user_id = session.user_id  # ty: ignore[unresolved-attribute]
+        return request_

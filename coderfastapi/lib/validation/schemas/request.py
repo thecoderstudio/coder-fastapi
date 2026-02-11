@@ -6,6 +6,8 @@ from starlette.requests import Request
 
 
 class HTTPRequestSchema(BaseModel):
+    """Structured representation of an HTTP request (primarily for Cloud Logging)."""
+
     request_method: str = Field(alias="requestMethod")
     request_url: AnyHttpUrl = Field(alias="requestUrl")
     request_size: int = Field(alias="requestSize")
@@ -18,9 +20,9 @@ class HTTPRequestSchema(BaseModel):
     def from_request(cls, request: Request) -> Self:
         return cls(
             requestMethod=request.method,
-            requestUrl=str(request.url),
+            requestUrl=str(request.url),  # ty: ignore[invalid-argument-type]
             requestSize=sys.getsizeof(request),
-            remoteIp=request.client.host,
+            remoteIp=request.client.host if request.client else None,
             protocol=request.url.scheme,
             referrer=request.headers.get("referrer"),
             userAgent=request.headers.get("user-agent"),

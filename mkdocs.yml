@@ -1,0 +1,26 @@
+site_name: Coder FastAPI
+site_description: Security and utility library for building FastAPI applications with authentication, authorization, and pagination.
+
+theme:
+  name: material
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            members_order: source
+
+nav:
+  - Home: index.md
+  - API Reference:
+      - Handlers: reference/handlers.md
+      - Router: reference/router.md
+      - Decorators: reference/decorators.md
+      - Security: reference/security.md
+      - Validation Schemas: reference/schemas.md
+      - Logging: reference/logging.md
+      - Test Utilities: reference/test.md

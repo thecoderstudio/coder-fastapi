@@ -9,11 +9,15 @@ log = logging.getLogger(__name__)
 
 
 class UserAuthorizationPolicy(AuthorizationPolicy):
+    """Authorization policy that adds Authenticated and user-specific principals."""
+
     @classmethod
-    def get_principals(cls, request: Request) -> tuple[str, ...]:
+    def get_principals(
+        cls, request: Request
+    ) -> tuple[str, ...]:  # ty: ignore[invalid-method-override]
         principals = super().get_principals(request)
 
-        authenticated_user_id = request.user_id
+        authenticated_user_id = request.user_id  # ty: ignore[unresolved-attribute]
         if authenticated_user_id:
             principals = cls._with_authenticated_user_principals(
                 principals,
@@ -33,13 +37,15 @@ class UserAuthorizationPolicy(AuthorizationPolicy):
 
 
 class RecoverableUserAuthorizationPolicy(UserAuthorizationPolicy):
+    """User authorization policy that grants recovery-specific principals"""
+
     @classmethod
     def get_principals(cls, request: Request) -> tuple[str, ...]:
-        if not request.recovery:
+        if not request.recovery:  # ty: ignore[unresolved-attribute]
             return super().get_principals(request)
 
         principals = AuthorizationPolicy.get_principals(request) + (
-            f"recovering_user:{request.user_id}",
+            f"recovering_user:{request.user_id}",  # ty: ignore[unresolved-attribute]
         )
         log.debug(f"Found principals: {principals}")
         return principals

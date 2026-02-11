@@ -4,12 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "coderfastapi"
-version = "5.5.0"
+version = "6.0.0"
 description = "coderfastapi"
 readme = "README.md"
 authors = [{ name = "Code R", email = "hello@coderstudio.dev" }]
+license = "Apache-2.0"
 dependencies = [
-    'codercore ~= 6.5',
+    'codercore ~= 8.0',
     'fastapi[all] ~= 0.89',
     'google-cloud-logging ~= 3.7',
     'orjson ~= 3.8',
@@ -30,10 +31,15 @@ dev = [
     'bumpver ~= 2023.1127',
     'flake8 ~= 6.0',
     'isort ~= 5.12',
+    'ty ~= 0.0'
+]
+docs = [
+    'mkdocs-material',
+    'mkdocstrings[python]',
 ]
 
 [tool.bumpver]
-current_version = "5.5.0"
+current_version = "6.0.0"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true
@@ -48,6 +54,12 @@ push = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.ty.environment]
+python-version = "3.12"
+
+[tool.ty.src]
+exclude = ["tests/"]
 
 [tool.isort]
 profile = "black"

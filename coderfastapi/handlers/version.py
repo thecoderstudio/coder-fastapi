@@ -8,6 +8,8 @@ def register_version_handler(
     version: str,
     path: str = "/",
 ) -> None:
+    """Register a GET endpoint that returns the API version."""
+
     @router.get(path, response_model=VersionSchema)
     async def get_version():
         return {"version": version}

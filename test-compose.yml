@@ -19,6 +19,7 @@ services:
   cache-test:
     container_name: coder-fastapi-cache-test
     image: redis:7
+    command: ["redis-server", "--databases", "128"]
     networks:
       - test
     env_file:

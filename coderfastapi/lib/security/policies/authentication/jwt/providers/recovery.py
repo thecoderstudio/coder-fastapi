@@ -10,10 +10,13 @@ log = logging.getLogger(__name__)
 
 
 class RecoveryDataProvider(JWTDataProvider):
+    """JWT provider that handles the recovery mode flag on requests and tokens."""
+
     def augment_request(self, request: T, data: dict[str, Any]) -> T:
         request_ = super().augment_request(request, data)
-        request_.recovery = data.get("recovery", False)
-        log.info(f"Recovery mode: {request_.recovery}")
+        recovery = data.get("recovery", False)
+        request_.recovery = recovery  # ty: ignore[unresolved-attribute]
+        log.info(f"Recovery mode: {recovery}")
         return request_
 
     def parse_to_encode(self, data: dict[str, Any]) -> dict[str, Any]:

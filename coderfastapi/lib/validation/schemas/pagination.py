@@ -8,12 +8,17 @@ from pydantic import BeforeValidator
 
 
 class Cursor(BaseCursor):
+    """FastAPI-compatible cursor.
+
+    Serializes using jsonable_encoder for Pydantic types.
+    """
+
     def _json_dumps(self) -> str:
         return json.dumps(jsonable_encoder(asdict(self)))
 
     @classmethod
     def decode(cls, v: bytes) -> Self:
-        return Cursor(**cls._json_loads(v))
+        return cls(**cls._json_loads(v))
 
 
 DeserializableCursor = Annotated[Cursor, BeforeValidator(lambda v: _deserialize(v))]

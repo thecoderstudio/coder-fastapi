@@ -2,7 +2,6 @@ from datetime import UTC, datetime
 
 import pytest
 from codercore.lib.aggregation import DatePrecision
-from codercore.test.pydantic import check_validation_value_error
 from pydantic_core import ArgsKwargs
 
 from coderfastapi.lib.validation.schemas.aggregation import (
@@ -34,6 +33,22 @@ def test_dated_aggregation_parameters_mixin_schema_complete(date_precision):
     assert params.min_date == min_date
     assert params.max_date == max_date
     assert params.date_precision == date_precision
+
+
+@pytest.mark.parametrize("date_precision", tuple(DatePrecision))
+def test_dated_aggregation_parameters_mixin_schema_complete_through_dict(
+    date_precision,
+):
+    min_date = datetime.now(UTC)
+    max_date = datetime.now(UTC)
+    data = {
+        "min_date": min_date,
+        "max_date": max_date,
+        "date_precision": date_precision,
+    }
+
+    result_data = DatedAggregationParametersMixinSchema.validate(data)
+    assert result_data == data
 
 
 def test_dated_aggregation_parameters_mixin_schema_max_date_preceeds_min_date():

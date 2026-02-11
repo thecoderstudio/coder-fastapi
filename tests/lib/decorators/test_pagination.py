@@ -94,6 +94,29 @@ async def test_paginate_no_links(mocker):
     assert response_mock.headers == {}
 
 
+@pytest.mark.parametrize("direction", (Direction.ASC, Direction.DESC))
+async def test_paginate_no_links_due_to_result_size(mocker, direction):
+    limit = 1
+    value = []
+    request_mock = create_request_mock(
+        mocker,
+        QueryParameters(
+            cursor=DeserializableCursor(
+                last_id=1,
+                last_value=1,
+                direction=direction,
+            ),
+            limit=limit,
+        ),
+    )
+    response_mock = create_response_mock(mocker, request_mock)
+
+    result = await decorated(request_mock, response_mock, value=value)
+
+    assert result == value
+    assert response_mock.headers == {}
+
+
 async def test_paginate_not_injectable(mocker):
     limit = 1
     params = QueryParameters(cursor=None, limit=limit)

@@ -6,6 +6,10 @@ HTTP_REQUEST_CONTEXT_NAME = "http_request_context"
 
 
 class CloudTraceContext:
+    """Typed ContextVar wrapper that stores a (trace_id, span_id) tuple.
+
+    parsed from the X-Cloud-Trace-Context header value."""
+
     _context_var: ContextVar
 
     def __init__(self, name: str) -> None:

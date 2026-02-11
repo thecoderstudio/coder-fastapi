@@ -11,6 +11,10 @@ CLOUD_RUN_INDICATOR = "K_SERVICE"
 
 
 def setup_cloud_logging() -> None:
+    """Configure Google Cloud Logging with trace context filters.
+
+    Only activates when running in Cloud Run.
+    """
     if not _is_running_in_cloud_environment():
         return
     client = Client()

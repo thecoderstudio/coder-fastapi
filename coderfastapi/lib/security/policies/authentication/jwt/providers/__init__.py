@@ -8,7 +8,10 @@ T = TypeVar("T", bound=Request)
 
 
 class JWTDataProvider(ABC):
+    """Base class for JWT providers that augment requests."""
+
     def augment_request(self, request: T, data: dict[str, Any]) -> T:
+        """Augment a request with data decoded from the JWT. Returns a shallow copy."""
         return copy.copy(request)
 
     @abstractmethod

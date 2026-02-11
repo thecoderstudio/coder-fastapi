@@ -1,5 +1,5 @@
 from inspect import Parameter, Signature, isclass, signature
-from typing import Any, Awaitable, Callable, Iterable, TypeVar
+from typing import Any, Awaitable, Callable, Sequence, TypeVar
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from codercore.lib.collection import Direction
@@ -9,12 +9,12 @@ from fastapi.params import Depends
 
 from coderfastapi.lib.decorators.util import propagate_params
 from coderfastapi.lib.signature import copy_parameters
-from coderfastapi.lib.validation.schemas.pagination import DeserializableCursor
+from coderfastapi.lib.validation.schemas.pagination import Cursor
 from coderfastapi.lib.validation.schemas.query import QueryParameters
 
 T = TypeVar("T")
 S = TypeVar("S", bound=QueryParameters)
-Entities = Iterable[T]
+Entities = Sequence[T]
 
 
 def paginate(
@@ -23,8 +23,10 @@ def paginate(
     [Callable[..., Awaitable[Entities]]],
     Callable[[Request, Response, ...], Awaitable[Entities]],
 ]:
+    """Add RFC 5988 cursor-based pagination Link headers to an endpoint."""
+
     def decorate(
-        func: Callable[..., Awaitable[Entities]]
+        func: Callable[..., Awaitable[Entities]],
     ) -> Callable[[Request, Response, ...], Awaitable[Entities]]:
         func_signature = signature(func)
 
@@ -49,7 +51,7 @@ def paginate(
             return result
 
         wrapped_signature = signature(wrapped)
-        wrapped.__signature__ = copy_parameters(
+        wrapped.__signature__ = copy_parameters(  # ty: ignore[unresolved-attribute]
             wrapped_signature, func_signature, ["request", "response"]
         )
         return wrapped
@@ -57,7 +59,9 @@ def paginate(
     return decorate
 
 
-def _get_query_schema(func_signature: Signature, request: Request) -> tuple[str, S]:
+def _get_query_schema(
+    func_signature: Signature, request: Request
+) -> tuple[str, S | None]:
     for name, parameter in func_signature.parameters.items():
         if _is_valid_query_parameter(parameter):
             if _is_injectable(parameter):
@@ -89,6 +93,9 @@ def _build_links(
 ) -> list[str]:
     result_length = len(result)
     links = []
+    if result_length == 0:
+        return links
+
     value_attr = getattr(query_schema, "order_by", id_attr)
 
     if previous_cursor := query_schema.cursor:
@@ -112,8 +119,8 @@ def _create_cursor(
     id_attr: SequentialCollection[str],
     value_attr: str | SequentialCollection[str],
     item: T,
-) -> DeserializableCursor:
-    return DeserializableCursor(
+) -> Cursor:
+    return Cursor(
         last_id=_get_last_id(item, id_attr),
         last_value=_get_last_value(item, value_attr),
         direction=direction,
@@ -137,12 +144,12 @@ def _get_last_value(item: T, value_attr: str | SequentialCollection[str]) -> Any
         return getattr(item, value_attr)
 
 
-def _construct_link(cursor: DeserializableCursor, rel: str, request: Request) -> str:
+def _construct_link(cursor: Cursor, rel: str, request: Request) -> str:
     url = _construct_url_with_cursor(cursor, request)
     return f'<{url}>; rel="{rel}"'
 
 
-def _construct_url_with_cursor(cursor: DeserializableCursor, request: Request) -> str:
+def _construct_url_with_cursor(cursor: Cursor, request: Request) -> str:
     scheme, netloc, path, query_string, fragment = urlsplit(str(request.url))
     query_params = parse_qs(query_string)
     query_params["cursor"] = [str(cursor)]

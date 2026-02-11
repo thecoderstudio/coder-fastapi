@@ -11,6 +11,8 @@ SESSION_ID_BYTE_LENGTH = 32
 
 @dataclass
 class Session:
+    """Base session data with ID and remaining TTL."""
+
     id: str
     remaining_ttl: timedelta
 
@@ -19,8 +21,10 @@ T = TypeVar("T", bound=Session)
 
 
 class SessionManager(metaclass=ABCMeta):
+    """Abstract session manager that stores sessions in Redis with configurable TTL."""
+
     cache_connection: Redis
-    session_ttl: int
+    session_ttl: timedelta
 
     def __init__(self, cache_connection: Redis, session_ttl: timedelta) -> None:
         self.cache_connection = cache_connection

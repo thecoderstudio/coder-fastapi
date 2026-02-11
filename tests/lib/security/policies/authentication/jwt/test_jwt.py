@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from jose import jwt
@@ -68,12 +68,12 @@ def test_authenticate_request_failure(request_with_session_mock, headers):
 )
 def test_create_access_token(mocker, recovery, user_id):
     policy = JWTAuthenticationPolicy(FAKE_KEY)
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     datetime_mock = mocker.patch(
         "coderfastapi.lib.security.policies.authentication.jwt.providers."
         "expiration.datetime"
     )
-    datetime_mock.utcnow.return_value = now
+    datetime_mock.now.return_value = now
     delta = timedelta(minutes=1)
     expected_exp = now + delta
 

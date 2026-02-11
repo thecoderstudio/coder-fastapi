@@ -15,6 +15,11 @@ INTERNAL_SERVER_ERROR = "Internal Server Error"
 
 
 class LoggingMiddleware:
+    """ASGI middleware for structured logging.
+
+    Sets Cloud Trace and HTTP request context.
+    """
+
     app: ASGIApp
     cloud_trace_context: CloudTraceContext
     http_request_context: ContextVar

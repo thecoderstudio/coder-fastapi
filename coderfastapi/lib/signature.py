@@ -8,6 +8,10 @@ def copy_parameters(
     to_signature: Signature,
     parameter_keys: Sequence[str],
 ) -> Signature:
+    """Copy specified parameters from one function signature to another.
+
+    Preserves ordering.
+    """
     filtered_parameters = [
         to_signature.parameters[key]
         for key in to_signature.parameters
@@ -51,4 +55,5 @@ def _create_new_parameters(
 
 
 def check_parameter_has_default(parameter: Parameter) -> bool:
+    """Return True if the parameter has a default value."""
     return parameter.default != Parameter.empty

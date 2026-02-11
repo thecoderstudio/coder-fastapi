@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from coderfastapi.lib.security.policies.authentication.jwt import ExpirationDataProvider
 
@@ -11,12 +11,12 @@ def test_expiration_data_provider_augment_request(mocker):
 
 
 def test_expiration_data_provider_parse_to_encode(mocker):
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     datetime_mock = mocker.patch(
         "coderfastapi.lib.security.policies.authentication.jwt.providers."
         "expiration.datetime"
     )
-    datetime_mock.utcnow.return_value = now
+    datetime_mock.now.return_value = now
     delta = timedelta(minutes=1)
     expected_exp = now + delta
 
