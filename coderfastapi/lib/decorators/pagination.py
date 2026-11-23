@@ -5,7 +5,9 @@ from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 from codercore.lib.collection import Direction
 from codercore.types import SequentialCollection
 from fastapi import Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.params import Depends
+from pydantic import ValidationError
 
 from coderfastapi.lib.decorators.util import propagate_params
 from coderfastapi.lib.signature import copy_parameters
@@ -65,7 +67,10 @@ def _get_query_schema(
     for name, parameter in func_signature.parameters.items():
         if _is_valid_query_parameter(parameter):
             if _is_injectable(parameter):
-                return (name, parameter.annotation(**dict(request.query_params)))
+                try:
+                    return (name, parameter.annotation(**dict(request.query_params)))
+                except ValidationError as e:
+                    raise RequestValidationError(e.errors()) from e
             else:
                 return (name, None)
     raise KeyError("QuerySchema not found")

@@ -1,9 +1,11 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 import httpx
 import pytest
 from codercore.lib.collection import Direction
 from fastapi import Depends, Request
+from fastapi.exceptions import RequestValidationError
 
 from coderfastapi.lib.decorators import paginate
 from coderfastapi.lib.validation.schemas.pagination import DeserializableCursor
@@ -18,6 +20,10 @@ class ListEntityParameters(OrderableQueryParameters):
     _orderable_properties = ("value",)
 
 
+class DatetimeQueryParameters(QueryParameters):
+    start_time: datetime
+
+
 @dataclass
 class Entity:
     id: int
@@ -29,6 +35,13 @@ class MultiIDEntity:
     id_a: str
     id_b: int
     value: str
+
+
+@dataclass
+class DatetimeEntity:
+    id: int
+    value: str
+    start_time: datetime
 
 
 @paginate("id")
@@ -60,6 +73,14 @@ async def decorated_not_injectable(
     value: list[Entity],
     params: QueryParameters,
 ) -> list[Entity]:
+    return value
+
+
+@paginate("start_time")
+async def decorated_datetime(
+    value: list[DatetimeEntity],
+    params: DatetimeQueryParameters = Depends(),
+) -> list[DatetimeEntity]:
     return value
 
 
@@ -360,3 +381,51 @@ async def test_paginate_query_schema_not_found(mocker):
 
     with pytest.raises(KeyError):
         await decorated_without_schema(request_mock, response_mock, value=value)
+
+
+async def test_paginate_datetime_query_next_link(mocker):
+    start_time = datetime(2026, 1, 1, 12, 30)
+    params = {"limit": "1", "start_time": start_time.isoformat()}
+    request_mock = mocker.MagicMock()
+    request_mock.query_params = params
+    request_mock.url = httpx.URL(
+        f"http://localhost?limit={params["limit"]}&start_time={params["start_time"]}"
+    )
+    response_mock = create_response_mock(mocker, request_mock)
+    value = [DatetimeEntity(id=1, value="a", start_time=start_time)]
+
+    result = await decorated_datetime(request_mock, response_mock, value=value)
+
+    assert result == value
+    assert_link_header(
+        response_mock,
+        {
+            "next": {
+                "limit": params["limit"],
+                "start_time": params["start_time"],
+                "cursor": DeserializableCursor(
+                    last_id=value[0].start_time,
+                    last_value=value[0].start_time,
+                    direction=Direction.ASC,
+                ),
+            }
+        },
+    )
+
+
+async def test_paginate_datetime_query_validation_error(mocker):
+    params = {"limit": "1", "start_time": ""}
+    request_mock = mocker.MagicMock()
+    request_mock.query_params = params
+    request_mock.url = httpx.URL(
+        f"http://localhost?limit={params["limit"]}&start_time={params["start_time"]}"
+    )
+    response_mock = create_response_mock(mocker, request_mock)
+
+    with pytest.raises(RequestValidationError) as exc_info:
+        await decorated_datetime(request_mock, response_mock, value=[])
+
+    errors = exc_info.value.errors()
+    assert len(errors) == 1
+    assert errors[0]["loc"] == ("start_time",)
+    assert errors[0]["type"] == "datetime_from_date_parsing"
