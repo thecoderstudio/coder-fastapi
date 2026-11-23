@@ -322,7 +322,7 @@ async def test_paginate_with_previous_cursor_previous_link(mocker):
     )
 
 
-@pytest.mark.parametrize("direction", ("asc", "desc"))
+@pytest.mark.parametrize("direction", (Direction.ASC, Direction.DESC))
 async def test_paginate_with_previous_cursor_full_links(mocker, direction):
     limit = 1
     value = [Entity(id=1, value="a"), Entity(id=2, value="b")]

@@ -1,4 +1,3 @@
-version: '3'
 services:
   coder-fastapi-test:
     container_name: coder-fastapi-test
